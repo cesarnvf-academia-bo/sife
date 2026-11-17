@@ -1,0 +1,258 @@
+<section class="w-full space-y-6">
+  <header>
+    <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Empresa</h1>
+    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      Consulte, adicione o modifique los datos de una empresa.
+    </p>
+  </header>
+
+  <form
+    [formGroup]="formulario"
+    autocomplete="off"
+    class="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+  >
+    <div class="flex flex-wrap items-end gap-3">
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Identificador
+        </span>
+        <input
+          type="number"
+          min="1"
+          formControlName="id"
+          placeholder="Ej. 1"
+          (keyup.enter)="buscar()"
+          class="w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <sife-boton-icono
+        icono="buscar"
+        etiqueta="Buscar empresa"
+        texto="Buscar"
+        variante="secundario"
+        (accion)="buscar()"
+      />
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">NIT</span>
+        <input
+          type="text"
+          formControlName="nit"
+          maxlength="20"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.nit.touched && formulario.controls.nit.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un NIT de hasta 20 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Razón social
+        </span>
+        <input
+          type="text"
+          formControlName="razonsocial"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.razonsocial.touched && formulario.controls.razonsocial.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese una razón social de hasta 250 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código de sistema
+        </span>
+        <input
+          type="text"
+          formControlName="codigoSistema"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Modalidad
+        </span>
+        <input
+          type="text"
+          formControlName="modalidad"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ambiente
+        </span>
+        <input
+          type="text"
+          formControlName="ambiente"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ruta de código
+        </span>
+        <input
+          type="text"
+          formControlName="rutaCodigo"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ruta de sincronización
+        </span>
+        <input
+          type="text"
+          formControlName="rutaSincronizacion"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ruta de operación
+        </span>
+        <input
+          type="text"
+          formControlName="rutaOperacion"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ruta de compraventa
+        </span>
+        <input
+          type="text"
+          formControlName="rutaCompraventa"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 flex flex-wrap items-center gap-2">
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Token</span>
+          @if (tieneToken()) {
+            <span
+              class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+            >
+              Configurado
+            </span>
+          }
+        </span>
+        <input
+          type="password"
+          formControlName="token"
+          autocomplete="new-password"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Ruta de firma digital
+        </span>
+        <input
+          type="text"
+          formControlName="rutaFirmaDigital"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 flex flex-wrap items-center gap-2">
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-300">
+            Clave de firma digital
+          </span>
+          @if (tieneClaveFirmaDigital()) {
+            <span
+              class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+            >
+              Configurada
+            </span>
+          }
+        </span>
+        <input
+          type="password"
+          formControlName="claveFirmaDigital"
+          autocomplete="new-password"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+    </div>
+
+    <div
+      class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 dark:border-slate-800"
+    >
+      <sife-boton-icono
+        icono="agregar"
+        etiqueta="Adicionar empresa"
+        texto="Adicionar"
+        variante="primario"
+        (accion)="adicionar()"
+      />
+      <sife-boton-icono
+        icono="actualizar"
+        etiqueta="Modificar empresa"
+        texto="Modificar"
+        variante="secundario"
+        (accion)="modificar()"
+      />
+      <sife-boton-icono
+        icono="limpiar"
+        etiqueta="Limpiar formulario"
+        texto="Limpiar"
+        variante="fantasma"
+        (accion)="limpiar()"
+      />
+
+      @if (cargando()) {
+        <span class="text-sm text-slate-500 dark:text-slate-400">Procesando...</span>
+      }
+    </div>
+
+    @if (mensaje()) {
+      <p
+        class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+        aria-live="polite"
+      >
+        {{ mensaje() }}
+      </p>
+    }
+
+    @if (error()) {
+      <p
+        class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200"
+        aria-live="assertive"
+      >
+        {{ error() }}
+      </p>
+    }
+  </form>
+
+  <div
+    class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+  >
+    <p>El token y la clave de firma digital no se muestran por seguridad.</p>
+    <p class="mt-1">Si se dejan vacíos al modificar, se conserva el valor actual.</p>
+  </div>
+</section>
