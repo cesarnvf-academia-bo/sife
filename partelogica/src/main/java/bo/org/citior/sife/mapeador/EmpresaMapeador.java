@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmpresaMapeador {
 
-    public Empresa aEntidad(EmpresaSolicitud solicitud) {
+    public Empresa aModelo(EmpresaSolicitud solicitud) {
         return Empresa.builder()
                 .nit(solicitud.nit().trim())
                 .razonsocial(solicitud.razonsocial().trim())

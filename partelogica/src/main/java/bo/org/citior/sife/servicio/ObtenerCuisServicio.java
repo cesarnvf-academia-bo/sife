@@ -12,7 +12,7 @@ import bo.org.citior.sife.excepcion.ConfiguracionSiatInvalidaExcepcion;
 import bo.org.citior.sife.excepcion.EmpresaNoEncontradaExcepcion;
 import bo.org.citior.sife.excepcion.SiatNoDisponibleExcepcion;
 import bo.org.citior.sife.excepcion.TokenSiatNoConfiguradoExcepcion;
-import bo.org.citior.sife.repositorio.EmpresaRepositorio;
+import bo.org.citior.sife.mapper.EmpresaMapper;
 import bo.org.citior.sife.siat.ClienteSiatFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,13 +23,19 @@ public class ObtenerCuisServicio {
 
     private static final int CODIGO_SUCURSAL = 0;
 
-    private final EmpresaRepositorio empresaRepositorio;
+    private final EmpresaMapper empresaMapper;
     private final ClienteSiatFactory clienteSiatFactory;
     private final PropiedadesSiat propiedades;
 
     public CuisRespuesta obtener(Long empresaId, CuisSolicitud solicitud) {
-        Empresa empresa = empresaRepositorio.findById(empresaId)
-                .orElseThrow(() -> new EmpresaNoEncontradaExcepcion(empresaId));
+        return obtener(empresaId, CODIGO_SUCURSAL, solicitud.codigoPuntoVenta());
+    }
+
+    public CuisRespuesta obtener(Long empresaId, int codigoSucursal, int codigoPuntoVenta) {
+        Empresa empresa = empresaMapper.findById(empresaId);
+        if (empresa == null) {
+            throw new EmpresaNoEncontradaExcepcion(empresaId);
+        }
 
         if (empresa.getToken() == null || empresa.getToken().isBlank()) {
             throw new TokenSiatNoConfiguradoExcepcion(empresaId);
@@ -45,13 +51,12 @@ public class ObtenerCuisServicio {
         int codigoModalidad = parsearEntero(
                 empresaId, "modalidad", empresa.getModalidad());
         long nit = parsearNit(empresaId, empresa.getNit());
-        int codigoPuntoVenta = solicitud.codigoPuntoVenta();
 
         SolicitudCuis solicitudSiat = new SolicitudCuis();
         solicitudSiat.setCodigoAmbiente(codigoAmbiente);
         solicitudSiat.setCodigoModalidad(codigoModalidad);
         solicitudSiat.setCodigoSistema(codigoSistema);
-        solicitudSiat.setCodigoSucursal(CODIGO_SUCURSAL);
+        solicitudSiat.setCodigoSucursal(codigoSucursal);
         solicitudSiat.setNit(nit);
         solicitudSiat.setCodigoPuntoVenta(new ObjectFactory()
                 .createSolicitudCuisCodigoPuntoVenta(codigoPuntoVenta));
@@ -67,7 +72,7 @@ public class ObtenerCuisServicio {
             return new CuisRespuesta(
                     empresa.getId(),
                     empresa.getNit(),
-                    CODIGO_SUCURSAL,
+                    codigoSucursal,
                     codigoPuntoVenta,
                     respuesta.getCodigo(),
                     respuesta.getFechaVigencia() == null

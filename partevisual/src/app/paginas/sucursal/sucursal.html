@@ -1,0 +1,232 @@
+<section class="space-y-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-left">
+      <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Sucursal</h1>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        Administra las sucursales del sistema.
+      </p>
+    </div>
+    <sife-boton-icono
+      icono="agregar"
+      etiqueta="Adicionar sucursal"
+      texto="Adicionar"
+      variante="primario"
+      (accion)="adicionar()"
+    />
+  </header>
+
+  <sife-modal
+    [abierto]="modalAbierto()"
+    [titulo]="tituloModal()"
+    subtitulo="Complete los datos de la sucursal."
+    ancho="lg"
+    (cerrar)="cancelar()"
+  >
+    <form
+      [formGroup]="formulario"
+      autocomplete="off"
+      class="grid grid-cols-1 gap-4 md:grid-cols-12"
+    >
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código
+        </span>
+        <input
+          type="text"
+          formControlName="codigo"
+          maxlength="20"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.codigo.touched && formulario.controls.codigo.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un código de hasta 20 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-8">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Sucursal
+        </span>
+        <input
+          type="text"
+          formControlName="sucursal"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.sucursal.touched && formulario.controls.sucursal.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese una sucursal de hasta 250 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="flex items-center gap-2 self-end md:col-span-12">
+        <input
+          type="checkbox"
+          formControlName="estado"
+          class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-950"
+        />
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Activo</span>
+      </label>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 md:col-span-12 dark:border-slate-800">
+        <sife-boton-icono
+          icono="actualizar"
+          etiqueta="Guardar sucursal"
+          texto="Guardar"
+          variante="primario"
+          [deshabilitado]="guardando()"
+          (accion)="guardar()"
+        />
+        <sife-boton-icono
+          icono="limpiar"
+          etiqueta="Cancelar edición"
+          texto="Cancelar"
+          variante="fantasma"
+          [deshabilitado]="guardando()"
+          (accion)="cancelar()"
+        />
+      </div>
+    </form>
+  </sife-modal>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        (keyup.enter)="buscar()"
+        placeholder="Buscar por código o sucursal"
+        class="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      />
+      <sife-boton-icono
+        icono="buscar"
+        etiqueta="Buscar sucursales"
+        texto="Buscar"
+        variante="secundario"
+        (accion)="buscar()"
+      />
+      <sife-boton-icono
+        icono="limpiar"
+        etiqueta="Limpiar búsqueda"
+        texto="Limpiar"
+        variante="fantasma"
+        (accion)="limpiar()"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      Mostrar
+      <select
+        [value]="tamano()"
+        (change)="cambiarTamano($any($event.target).value)"
+        class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      >
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        <tr>
+          <th class="w-24 px-4 py-3 font-semibold">Código</th>
+          <th class="px-4 py-3 font-semibold">Sucursal</th>
+          <th class="w-32 px-4 py-3 font-semibold">Estado</th>
+          <th class="w-40 px-4 py-3 font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+        @for (sucursal of sucursales(); track sucursal.id) {
+          <tr class="text-slate-700 dark:text-slate-200">
+            <td class="px-4 py-3">{{ sucursal.codigo }}</td>
+            <td class="px-4 py-3">{{ sucursal.sucursal }}</td>
+            <td class="px-4 py-3">
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium"
+                [class.bg-emerald-100]="sucursal.estado"
+                [class.text-emerald-700]="sucursal.estado"
+                [class.dark:bg-emerald-950]="sucursal.estado"
+                [class.dark:text-emerald-300]="sucursal.estado"
+                [class.bg-slate-200]="!sucursal.estado"
+                [class.text-slate-600]="!sucursal.estado"
+                [class.dark:bg-slate-800]="!sucursal.estado"
+                [class.dark:text-slate-300]="!sucursal.estado"
+              >
+                {{ sucursal.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1">
+                <sife-boton-icono
+                  icono="editar"
+                  etiqueta="Editar sucursal"
+                  texto="Editar"
+                  variante="fantasma"
+                  (accion)="editar(sucursal)"
+                />
+                <sife-boton-icono
+                  icono="borrar"
+                  etiqueta="Borrar sucursal"
+                  texto="Borrar"
+                  variante="fantasma"
+                  (accion)="borrar(sucursal)"
+                />
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+              No hay sucursales registradas.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-800"
+    >
+      <span class="text-sm text-slate-600 dark:text-slate-400">
+        Mostrando {{ desde() }} de {{ total() }}
+      </span>
+      <div class="flex gap-1">
+        <sife-boton-icono
+          icono="primero"
+          etiqueta="Primera página"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="primero()"
+        />
+        <sife-boton-icono
+          icono="anterior"
+          etiqueta="Página anterior"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="anterior()"
+        />
+        <sife-boton-icono
+          icono="siguiente"
+          etiqueta="Página siguiente"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="siguiente()"
+        />
+        <sife-boton-icono
+          icono="ultimo"
+          etiqueta="Última página"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="ultimo()"
+        />
+      </div>
+    </footer>
+  </div>
+</section>

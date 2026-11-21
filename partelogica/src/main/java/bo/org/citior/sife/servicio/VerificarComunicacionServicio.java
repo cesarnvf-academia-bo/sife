@@ -10,7 +10,7 @@ import bo.org.citior.sife.dominio.dto.RespuestaVerificacionComunicacion;
 import bo.org.citior.sife.dominio.dto.ResultadoServicioSiat;
 import bo.org.citior.sife.excepcion.EmpresaNoEncontradaExcepcion;
 import bo.org.citior.sife.excepcion.TokenSiatNoConfiguradoExcepcion;
-import bo.org.citior.sife.repositorio.EmpresaRepositorio;
+import bo.org.citior.sife.mapper.EmpresaMapper;
 import bo.org.citior.sife.siat.ClienteSiatFactory;
 import java.time.Instant;
 import java.util.List;
@@ -25,13 +25,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class VerificarComunicacionServicio {
 
-    private final EmpresaRepositorio empresaRepositorio;
+    private final EmpresaMapper empresaMapper;
     private final ClienteSiatFactory clienteSiatFactory;
     private final PropiedadesSiat propiedades;
 
     public RespuestaVerificacionComunicacion verificar(Long empresaId) {
-        Empresa empresa = empresaRepositorio.findById(empresaId)
-                .orElseThrow(() -> new EmpresaNoEncontradaExcepcion(empresaId));
+        Empresa empresa = empresaMapper.findById(empresaId);
+        if (empresa == null) {
+            throw new EmpresaNoEncontradaExcepcion(empresaId);
+        }
 
         if (empresa.getToken() == null || empresa.getToken().isBlank()) {
             throw new TokenSiatNoConfiguradoExcepcion(empresaId);

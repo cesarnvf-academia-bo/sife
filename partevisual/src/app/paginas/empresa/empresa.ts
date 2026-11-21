@@ -1,27 +1,42 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BotonIcono } from '../../compartido/boton-icono';
+import { Modal } from '../../compartido/modal';
 import { Empresa as EmpresaModelo, EmpresaSolicitud } from '../../modelos/empresa';
 import { EmpresaServicio } from '../../servicios/empresa.servicio';
+import { ToastServicio } from '../../servicios/toast.servicio';
 
 @Component({
   selector: 'sife-empresa',
-  imports: [ReactiveFormsModule, BotonIcono],
+  imports: [ReactiveFormsModule, BotonIcono, Modal],
   templateUrl: './empresa.html',
 })
-export class Empresa {
+export class Empresa implements OnInit {
   private readonly constructorFormulario = inject(FormBuilder);
   private readonly empresaServicio = inject(EmpresaServicio);
+  private readonly toastServicio = inject(ToastServicio);
 
   protected readonly cargando = signal(false);
-  protected readonly mensaje = signal('');
-  protected readonly error = signal('');
+  protected readonly guardando = signal(false);
+  protected readonly modalAbierto = signal(false);
+  protected readonly existeRegistro = signal(false);
+  protected readonly empresa = signal<EmpresaModelo | null>(null);
   protected readonly tieneToken = signal(false);
   protected readonly tieneClaveFirmaDigital = signal(false);
 
+  protected readonly tituloModal = computed(() =>
+    this.existeRegistro() ? 'Editar empresa' : 'Adicionar empresa',
+  );
+  protected readonly textoAccion = computed(() =>
+    this.existeRegistro() ? 'Editar' : 'Adicionar',
+  );
+  protected readonly iconoAccion = computed(() =>
+    this.existeRegistro() ? 'editar' : 'agregar',
+  );
+
   protected readonly formulario = this.constructorFormulario.nonNullable.group({
-    id: [''],
+    id: ['1'],
     nit: ['', [Validators.required, Validators.maxLength(20)]],
     razonsocial: ['', [Validators.required, Validators.maxLength(250)]],
     codigoSistema: ['', [Validators.maxLength(50)]],
@@ -36,103 +51,107 @@ export class Empresa {
     claveFirmaDigital: [''],
   });
 
-  protected buscar(): void {
-    if (this.cargando()) {
-      return;
-    }
-
-    const id = this.obtenerId();
-    if (id === null) {
-      this.mostrarError('Ingrese un identificador válido.');
-      return;
-    }
-
-    this.cargando.set(true);
-    this.limpiarMensajes();
-
-    this.empresaServicio.obtenerPorId(id).subscribe({
-      next: (empresa) => {
-        this.cargarEmpresa(empresa);
-        this.mensaje.set('Empresa consultada correctamente.');
-        this.cargando.set(false);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.mostrarError(this.obtenerMensajeError(error));
-        this.cargando.set(false);
-      },
-    });
+  ngOnInit(): void {
+    this.cargarEmpresa();
   }
 
-  protected adicionar(): void {
-    if (this.cargando()) {
+  protected abrirFormulario(): void {
+    if (!this.existeRegistro()) {
+      this.formulario.reset({
+        id: '1',
+        nit: '',
+        razonsocial: '',
+        codigoSistema: '',
+        modalidad: '',
+        ambiente: '',
+        rutaCodigo: '',
+        rutaSincronizacion: '',
+        rutaOperacion: '',
+        rutaCompraventa: '',
+        token: '',
+        rutaFirmaDigital: '',
+        claveFirmaDigital: '',
+      });
+    } else {
+      this.formulario.patchValue({ token: '', claveFirmaDigital: '' });
+    }
+    this.modalAbierto.set(true);
+  }
+
+  protected cerrarFormulario(): void {
+    this.modalAbierto.set(false);
+    this.formulario.patchValue({ token: '', claveFirmaDigital: '' });
+  }
+
+  protected guardar(): void {
+    if (this.guardando()) {
       return;
     }
 
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
-      this.mostrarError('Complete los campos obligatorios.');
+      this.toastServicio.advertencia('Complete los campos obligatorios.');
       return;
     }
 
-    this.cargando.set(true);
-    this.limpiarMensajes();
+    const eraNuevo = !this.existeRegistro();
+    this.guardando.set(true);
+    const solicitud = this.construirSolicitud();
 
-    this.empresaServicio.adicionar(this.construirSolicitud()).subscribe({
-      next: (empresa) => {
-        this.cargarEmpresa(empresa);
-        this.mensaje.set('Empresa adicionada correctamente.');
-        this.cargando.set(false);
+    const peticion = eraNuevo
+      ? this.empresaServicio.adicionar(solicitud)
+      : this.empresaServicio.modificar(1, solicitud);
+
+    peticion.subscribe({
+      next: (respuesta) => {
+        this.existeRegistro.set(true);
+        this.empresa.set(respuesta);
+        this.cargarDatos(respuesta);
+        this.guardando.set(false);
+        this.cerrarFormulario();
+        this.toastServicio.exito(
+          eraNuevo
+            ? 'Empresa adicionada correctamente.'
+            : 'Empresa modificada correctamente.',
+        );
       },
       error: (error: HttpErrorResponse) => {
-        this.mostrarError(this.obtenerMensajeError(error));
+        this.guardando.set(false);
+        this.toastServicio.error(this.obtenerMensajeError(error));
+      },
+    });
+  }
+
+  private cargarEmpresa(): void {
+    this.cargando.set(true);
+
+    this.empresaServicio.obtenerPorId(1).subscribe({
+      next: (respuesta) => {
+        this.existeRegistro.set(true);
+        this.empresa.set(respuesta);
+        this.cargarDatos(respuesta);
+        this.cargando.set(false);
+        this.toastServicio.informacion('Empresa cargada correctamente.');
+      },
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 404) {
+          this.existeRegistro.set(false);
+          this.empresa.set(null);
+          this.formulario.patchValue({ id: '1' });
+          this.tieneToken.set(false);
+          this.tieneClaveFirmaDigital.set(false);
+          this.toastServicio.informacion('No hay empresa registrada. Adiciónela para continuar.');
+        } else {
+          this.toastServicio.error(this.obtenerMensajeError(error));
+        }
         this.cargando.set(false);
       },
     });
   }
 
-  protected modificar(): void {
-    if (this.cargando()) {
-      return;
-    }
-
-    const id = this.obtenerId();
-    if (id === null) {
-      this.mostrarError('Consulte una empresa antes de modificarla.');
-      return;
-    }
-
-    if (this.formulario.invalid) {
-      this.formulario.markAllAsTouched();
-      this.mostrarError('Complete los campos obligatorios.');
-      return;
-    }
-
-    this.cargando.set(true);
-    this.limpiarMensajes();
-
-    this.empresaServicio.modificar(id, this.construirSolicitud()).subscribe({
-      next: (empresa) => {
-        this.cargarEmpresa(empresa);
-        this.mensaje.set('Empresa modificada correctamente.');
-        this.cargando.set(false);
-      },
-      error: (error: HttpErrorResponse) => {
-        this.mostrarError(this.obtenerMensajeError(error));
-        this.cargando.set(false);
-      },
-    });
-  }
-
-  protected limpiar(): void {
-    this.formulario.reset();
-    this.tieneToken.set(false);
-    this.tieneClaveFirmaDigital.set(false);
-    this.limpiarMensajes();
-  }
-
-  private cargarEmpresa(empresa: EmpresaModelo): void {
+  private cargarDatos(empresa: EmpresaModelo): void {
     this.formulario.patchValue({
-      id: String(empresa.id),
+      id: '1',
       nit: empresa.nit ?? '',
       razonsocial: empresa.razonsocial ?? '',
       codigoSistema: empresa.codigoSistema ?? '',
@@ -170,24 +189,9 @@ export class Empresa {
     };
   }
 
-  private obtenerId(): number | null {
-    const id = Number(this.formulario.controls.id.value);
-    return Number.isInteger(id) && id > 0 ? id : null;
-  }
-
   private normalizar(valor: string): string | null {
     const limpio = valor.trim();
     return limpio.length > 0 ? limpio : null;
-  }
-
-  private mostrarError(mensaje: string): void {
-    this.mensaje.set('');
-    this.error.set(mensaje);
-  }
-
-  private limpiarMensajes(): void {
-    this.mensaje.set('');
-    this.error.set('');
   }
 
   private obtenerMensajeError(error: HttpErrorResponse): string {

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.CufdMapper">
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.Cufd"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO cufd (
+        empresa_id, sucursal_id, puntoventa_id, cuis_id, codigo_sucursal,
+        codigo_punto_venta, cufd, codigo_control, direccion,
+        fecha_vigencia, transaccion, mensajes, estado
+    ) VALUES (
+        #{empresaId}, #{sucursalId}, #{puntoventaId}, #{cuisId}, #{codigoSucursal},
+        #{codigoPuntoVenta}, #{cufd}, #{codigoControl}, #{direccion},
+        #{fechaVigencia}, #{transaccion}, #{mensajes}, FALSE
+    )
+  </insert>
+
+  <update id="activarVigente">
+    WITH candidato AS (
+      SELECT id
+      FROM cufd
+      WHERE empresa_id = #{empresaId}
+        AND puntoventa_id = #{puntoventaId}
+        AND transaccion = TRUE
+        AND fecha_vigencia IS NOT NULL
+        AND fecha_vigencia > CURRENT_TIMESTAMP
+      ORDER BY fecha_vigencia DESC, id DESC
+      LIMIT 1
+    )
+    UPDATE cufd
+    SET estado = (id IN (SELECT id FROM candidato))
+    WHERE empresa_id = #{empresaId}
+      AND puntoventa_id = #{puntoventaId}
+  </update>
+
+</mapper>

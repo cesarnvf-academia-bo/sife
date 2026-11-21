@@ -1,0 +1,384 @@
+<section class="space-y-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-left">
+      <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Punto de venta</h1>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        Administra los puntos de venta, CUIS y CUFD del sistema.
+      </p>
+    </div>
+    <sife-boton-icono
+      icono="agregar"
+      etiqueta="Adicionar punto de venta"
+      texto="Adicionar"
+      variante="primario"
+      (accion)="adicionar()"
+    />
+  </header>
+
+  <sife-modal
+    [abierto]="modalAbierto()"
+    [titulo]="tituloModal()"
+    subtitulo="Complete los datos del punto de venta."
+    ancho="lg"
+    (cerrar)="cancelar()"
+  >
+    <form
+      [formGroup]="formulario"
+      autocomplete="off"
+      class="grid grid-cols-1 gap-4 md:grid-cols-12"
+    >
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Sucursal
+        </span>
+        <select
+          formControlName="sucursalId"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option [value]="0" disabled>Seleccione una sucursal</option>
+          @for (sucursal of sucursales(); track sucursal.id) {
+            <option [value]="sucursal.id">{{ sucursal.codigo }} - {{ sucursal.sucursal }}</option>
+          }
+        </select>
+        @if (formulario.controls.sucursalId.touched && formulario.controls.sucursalId.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione una sucursal.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de punto de venta
+        </span>
+        <select
+          formControlName="tipo"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          @for (tipo of tipos; track tipo.codigo) {
+            <option [value]="tipo.codigo">{{ tipo.codigo }} - {{ tipo.descripcion }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código
+        </span>
+        <input
+          type="text"
+          formControlName="codigo"
+          maxlength="20"
+          placeholder="Ej. 0"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.codigo.touched && formulario.controls.codigo.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un código numérico de hasta 20 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-8">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Punto de venta
+        </span>
+        <input
+          type="text"
+          formControlName="puntoventa"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.puntoventa.touched && formulario.controls.puntoventa.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un punto de venta de hasta 250 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="flex items-center gap-2 self-end md:col-span-12">
+        <input
+          type="checkbox"
+          formControlName="estado"
+          class="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-950"
+        />
+        <span class="text-sm font-medium text-slate-700 dark:text-slate-300">Activo</span>
+      </label>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 md:col-span-12 dark:border-slate-800">
+        <sife-boton-icono
+          icono="actualizar"
+          etiqueta="Guardar punto de venta"
+          texto="Guardar"
+          variante="primario"
+          [deshabilitado]="guardando()"
+          (accion)="guardar()"
+        />
+        <sife-boton-icono
+          icono="limpiar"
+          etiqueta="Cancelar edición"
+          texto="Cancelar"
+          variante="fantasma"
+          [deshabilitado]="guardando()"
+          (accion)="cancelar()"
+        />
+      </div>
+    </form>
+  </sife-modal>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        (keyup.enter)="buscar()"
+        placeholder="Buscar por código, punto de venta o sucursal"
+        class="w-72 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      />
+      <sife-boton-icono
+        icono="buscar"
+        etiqueta="Buscar puntos de venta"
+        texto="Buscar"
+        variante="secundario"
+        (accion)="buscar()"
+      />
+      <sife-boton-icono
+        icono="limpiar"
+        etiqueta="Limpiar búsqueda"
+        texto="Limpiar"
+        variante="fantasma"
+        (accion)="limpiar()"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      Mostrar
+      <select
+        [value]="tamano()"
+        (change)="cambiarTamano($any($event.target).value)"
+        class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      >
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        <tr>
+          <th class="w-20 px-4 py-3 font-semibold">Código</th>
+          <th class="px-4 py-3 font-semibold">Punto de venta</th>
+          <th class="px-4 py-3 font-semibold">Sucursal</th>
+          <th class="w-40 px-4 py-3 font-semibold">Tipo</th>
+          <th class="w-28 px-4 py-3 font-semibold">Estado</th>
+          <th class="w-56 px-4 py-3 font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+        @for (puntoVenta of puntosVenta(); track puntoVenta.id) {
+          <tr class="text-slate-700 dark:text-slate-200">
+            <td class="px-4 py-3">{{ puntoVenta.codigo }}</td>
+            <td class="px-4 py-3">
+              <div>{{ puntoVenta.puntoventa }}</div>
+              @if (codigosPorPuntoVenta()[puntoVenta.id]?.cuis; as cuis) {
+                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400" [title]="cuis">
+                  CUIS: {{ resumirCodigo(cuis) }}
+                </div>
+              }
+              @if (codigosPorPuntoVenta()[puntoVenta.id]?.cufd; as cufd) {
+                <div class="mt-0.5 text-xs text-slate-500 dark:text-slate-400" [title]="cufd">
+                  CUFD: {{ resumirCodigo(cufd) }}
+                </div>
+              }
+            </td>
+            <td class="px-4 py-3">
+              {{ puntoVenta.codigoSucursal }} - Sucursal {{ puntoVenta.codigoSucursal }}
+            </td>
+            <td class="px-4 py-3">{{ puntoVenta.tipoDescripcion }}</td>
+            <td class="px-4 py-3">
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium"
+                [class.bg-emerald-100]="puntoVenta.estado"
+                [class.text-emerald-700]="puntoVenta.estado"
+                [class.dark:bg-emerald-950]="puntoVenta.estado"
+                [class.dark:text-emerald-300]="puntoVenta.estado"
+                [class.bg-slate-200]="!puntoVenta.estado"
+                [class.text-slate-600]="!puntoVenta.estado"
+                [class.dark:bg-slate-800]="!puntoVenta.estado"
+                [class.dark:text-slate-300]="!puntoVenta.estado"
+              >
+                {{ puntoVenta.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap items-center gap-1">
+                <sife-boton-icono
+                  icono="editar"
+                  etiqueta="Editar punto de venta"
+                  texto="Editar"
+                  variante="fantasma"
+                  (accion)="editar(puntoVenta)"
+                />
+                <sife-boton-icono
+                  icono="borrar"
+                  etiqueta="Borrar punto de venta"
+                  texto="Borrar"
+                  variante="fantasma"
+                  (accion)="borrar(puntoVenta)"
+                />
+                <sife-boton-icono
+                  icono="cuis"
+                  etiqueta="Obtener CUIS"
+                  variante="fantasma"
+                  [deshabilitado]="obteniendoCuis() === puntoVenta.id"
+                  (accion)="obtenerCuis(puntoVenta)"
+                />
+                <sife-boton-icono
+                  icono="cufd"
+                  etiqueta="Obtener CUFD"
+                  variante="fantasma"
+                  [deshabilitado]="obteniendoCufd() === puntoVenta.id"
+                  (accion)="obtenerCufd(puntoVenta)"
+                />
+                <sife-boton-icono
+                  icono="actualizar"
+                  etiqueta="Sincronizar catálogos"
+                  variante="fantasma"
+                  [deshabilitado]="sincronizando() === puntoVenta.id"
+                  (accion)="sincronizarCatalogos(puntoVenta)"
+                />
+                <sife-boton-icono
+                  icono="buscar"
+                  etiqueta="Mostrar catálogo"
+                  variante="fantasma"
+                  (accion)="mostrarCatalogo(puntoVenta)"
+                />
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+              No hay puntos de venta registrados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-800"
+    >
+      <span class="text-sm text-slate-600 dark:text-slate-400">
+        Mostrando {{ desde() }} de {{ total() }}
+      </span>
+      <div class="flex gap-1">
+        <sife-boton-icono
+          icono="primero"
+          etiqueta="Primera página"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="primero()"
+        />
+        <sife-boton-icono
+          icono="anterior"
+          etiqueta="Página anterior"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="anterior()"
+        />
+        <sife-boton-icono
+          icono="siguiente"
+          etiqueta="Página siguiente"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="siguiente()"
+        />
+        <sife-boton-icono
+          icono="ultimo"
+          etiqueta="Última página"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="ultimo()"
+        />
+      </div>
+    </footer>
+  </div>
+
+  <sife-modal
+    [abierto]="catalogoModalAbierto()"
+    titulo="Mostrar catálogo"
+    [subtitulo]="
+      'Datos recibidos del SIAT para el punto de venta ' + (catalogoPuntoVenta()?.codigo ?? '')
+    "
+    ancho="xl"
+    (cerrar)="cerrarCatalogo()"
+  >
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-12">
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Función
+        </span>
+        <select
+          [value]="catalogoFuncionSeleccionada()"
+          (change)="cambiarCatalogo($any($event.target).value)"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          @for (funcion of catalogoFunciones(); track funcion.nombre) {
+            <option [value]="funcion.nombre">{{ funcion.etiqueta }}</option>
+          }
+        </select>
+      </label>
+
+      @if (catalogo(); as catalogo) {
+        <p class="text-sm text-slate-600 md:col-span-6 dark:text-slate-400">
+          @if (catalogo.ejecutadoEn) {
+            Última sincronización: {{ catalogo.ejecutadoEn }}
+          } @else {
+            Aún no hay datos sincronizados para esta función.
+          }
+        </p>
+      }
+    </div>
+
+    <div class="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+      <table class="w-full text-left text-sm">
+        <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+          <tr>
+            @for (columna of catalogo()?.columnas ?? []; track columna) {
+              <th class="px-4 py-3 font-semibold">{{ columna }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+          @for (fila of catalogo()?.filas ?? []; track $index) {
+            <tr class="text-slate-700 dark:text-slate-200">
+              <td class="px-4 py-3">{{ fila.codigo }}</td>
+              <td class="px-4 py-3">{{ fila.descripcion }}</td>
+              @if ((catalogo()?.columnas?.length ?? 0) > 2) {
+                <td class="px-4 py-3">{{ fila.detalle }}</td>
+              }
+              @if ((catalogo()?.columnas?.length ?? 0) > 3) {
+                <td class="px-4 py-3">{{ fila.nandina }}</td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td
+                class="px-4 py-6 text-center text-slate-500 dark:text-slate-400"
+                [attr.colspan]="catalogo()?.columnas?.length || 1"
+              >
+                No hay datos para mostrar.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </sife-modal>
+</section>

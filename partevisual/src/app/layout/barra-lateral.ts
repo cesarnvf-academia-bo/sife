@@ -12,6 +12,8 @@ interface OpcionMenu {
 const OPCIONES_MENU: OpcionMenu[] = [
   { etiqueta: 'Inicio', ruta: '/inicio', icono: 'inicio' },
   { etiqueta: 'Empresa', ruta: '/empresa', icono: 'empresas' },
+  { etiqueta: 'Sucursal', ruta: '/sucursal', icono: 'sucursales' },
+  { etiqueta: 'Punto de venta', ruta: '/puntoventa', icono: 'puntoventa' },
 ];
 
 @Component({

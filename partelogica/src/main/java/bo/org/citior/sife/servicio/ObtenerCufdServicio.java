@@ -14,7 +14,7 @@ import bo.org.citior.sife.excepcion.ConfiguracionSiatInvalidaExcepcion;
 import bo.org.citior.sife.excepcion.EmpresaNoEncontradaExcepcion;
 import bo.org.citior.sife.excepcion.SiatNoDisponibleExcepcion;
 import bo.org.citior.sife.excepcion.TokenSiatNoConfiguradoExcepcion;
-import bo.org.citior.sife.repositorio.EmpresaRepositorio;
+import bo.org.citior.sife.mapper.EmpresaMapper;
 import bo.org.citior.sife.siat.ClienteSiatFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,34 +25,34 @@ public class ObtenerCufdServicio {
 
     private static final int CODIGO_SUCURSAL = 0;
 
-    private final EmpresaRepositorio empresaRepositorio;
+    private final EmpresaMapper empresaMapper;
     private final ObtenerCuisServicio obtenerCuisServicio;
     private final ClienteSiatFactory clienteSiatFactory;
     private final PropiedadesSiat propiedades;
 
     public CufdRespuesta obtener(Long empresaId, CufdSolicitud solicitud) {
-        Empresa empresa = empresaRepositorio.findById(empresaId)
-                .orElseThrow(() -> new EmpresaNoEncontradaExcepcion(empresaId));
-
-        if (empresa.getToken() == null || empresa.getToken().isBlank()) {
-            throw new TokenSiatNoConfiguradoExcepcion(empresaId);
-        }
-
-        String codigoSistema = empresa.getCodigoSistema();
-        if (codigoSistema == null || codigoSistema.isBlank()) {
-            throw new ConfiguracionSiatInvalidaExcepcion(empresaId, "codigoSistema");
-        }
-
-        int codigoAmbiente = parsearEntero(
-                empresaId, "ambiente", empresa.getAmbiente());
-        int codigoModalidad = parsearEntero(
-                empresaId, "modalidad", empresa.getModalidad());
-        long nit = parsearNit(empresaId, empresa.getNit());
-        int codigoPuntoVenta = solicitud.codigoPuntoVenta();
-
+        validarEmpresa(empresaId);
         CuisRespuesta cuisRespuesta = obtenerCuisServicio.obtener(
-                empresaId, new CuisSolicitud(codigoPuntoVenta));
+                empresaId, new CuisSolicitud(solicitud.codigoPuntoVenta()));
+        return obtenerConCuis(
+                empresaId, CODIGO_SUCURSAL, solicitud.codigoPuntoVenta(), cuisRespuesta);
+    }
 
+    public CufdRespuesta obtener(Long empresaId, int codigoSucursal, int codigoPuntoVenta) {
+        validarEmpresa(empresaId);
+        CuisRespuesta cuisRespuesta = obtenerCuisServicio.obtener(
+                empresaId, codigoSucursal, codigoPuntoVenta);
+        return obtenerConCuis(
+                empresaId, codigoSucursal, codigoPuntoVenta, cuisRespuesta);
+    }
+
+    public CufdRespuesta obtenerConCuis(
+            Long empresaId,
+            int codigoSucursal,
+            int codigoPuntoVenta,
+            CuisRespuesta cuisRespuesta) {
+
+        DatosEmpresa datos = validarEmpresa(empresaId);
         String cuis = cuisRespuesta == null || cuisRespuesta.cuis() == null
                 ? null
                 : cuisRespuesta.cuis().trim();
@@ -64,12 +64,12 @@ public class ObtenerCufdServicio {
         }
 
         SolicitudCufd solicitudSiat = new SolicitudCufd();
-        solicitudSiat.setCodigoAmbiente(codigoAmbiente);
-        solicitudSiat.setCodigoModalidad(codigoModalidad);
-        solicitudSiat.setCodigoSistema(codigoSistema);
-        solicitudSiat.setCodigoSucursal(CODIGO_SUCURSAL);
+        solicitudSiat.setCodigoAmbiente(datos.ambiente());
+        solicitudSiat.setCodigoModalidad(datos.modalidad());
+        solicitudSiat.setCodigoSistema(datos.empresa().getCodigoSistema());
+        solicitudSiat.setCodigoSucursal(codigoSucursal);
         solicitudSiat.setCuis(cuis);
-        solicitudSiat.setNit(nit);
+        solicitudSiat.setNit(datos.nit());
         solicitudSiat.setCodigoPuntoVenta(new ObjectFactory()
                 .createSolicitudCufdCodigoPuntoVenta(codigoPuntoVenta));
 
@@ -78,13 +78,13 @@ public class ObtenerCufdServicio {
                     .crearPuerto(
                             ServicioFacturacionCodigos.class,
                             propiedades.codigosUrl(),
-                            empresa.getToken().trim())
+                            datos.empresa().getToken().trim())
                     .cufd(solicitudSiat);
 
             return new CufdRespuesta(
-                    empresa.getId(),
-                    empresa.getNit(),
-                    CODIGO_SUCURSAL,
+                    datos.empresa().getId(),
+                    datos.empresa().getNit(),
+                    codigoSucursal,
                     codigoPuntoVenta,
                     respuesta.getCodigo(),
                     respuesta.getCodigoControl(),
@@ -102,6 +102,28 @@ public class ObtenerCufdServicio {
             throw new SiatNoDisponibleExcepcion(
                     "FacturacionCodigos", mensajeError(excepcion));
         }
+    }
+
+    private DatosEmpresa validarEmpresa(Long empresaId) {
+        Empresa empresa = empresaMapper.findById(empresaId);
+        if (empresa == null) {
+            throw new EmpresaNoEncontradaExcepcion(empresaId);
+        }
+
+        if (empresa.getToken() == null || empresa.getToken().isBlank()) {
+            throw new TokenSiatNoConfiguradoExcepcion(empresaId);
+        }
+
+        String codigoSistema = empresa.getCodigoSistema();
+        if (codigoSistema == null || codigoSistema.isBlank()) {
+            throw new ConfiguracionSiatInvalidaExcepcion(empresaId, "codigoSistema");
+        }
+
+        return new DatosEmpresa(
+                empresa,
+                parsearEntero(empresaId, "ambiente", empresa.getAmbiente()),
+                parsearEntero(empresaId, "modalidad", empresa.getModalidad()),
+                parsearNit(empresaId, empresa.getNit()));
     }
 
     private int parsearEntero(Long empresaId, String campo, String valor) {
@@ -125,5 +147,8 @@ public class ObtenerCufdServicio {
         return mensaje == null || mensaje.isBlank()
                 ? excepcion.getClass().getSimpleName()
                 : mensaje;
+    }
+
+    private record DatosEmpresa(Empresa empresa, int ambiente, int modalidad, long nit) {
     }
 }

@@ -2,6 +2,7 @@ package bo.org.citior.sife.controlador;
 
 import bo.org.citior.sife.dominio.dto.EmpresaRespuesta;
 import bo.org.citior.sife.dominio.dto.EmpresaSolicitud;
+import bo.org.citior.sife.dominio.dto.ResultadoOperacionEmpresa;
 import bo.org.citior.sife.servicio.EmpresaServicio;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -28,16 +29,20 @@ public class EmpresaControlador {
     private final EmpresaServicio empresaServicio;
 
     @PostMapping
-    @Operation(summary = "Adicionar empresa", description = "Crea una nueva empresa.")
+    @Operation(summary = "Adicionar empresa", description = "Crea o modifica la empresa única.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Empresa creada"),
+            @ApiResponse(responseCode = "200", description = "Empresa modificada"),
             @ApiResponse(responseCode = "400", description = "Datos de la empresa inválidos")
     })
     public ResponseEntity<EmpresaRespuesta> adicionar(
             @Valid @RequestBody EmpresaSolicitud solicitud) {
-        EmpresaRespuesta respuesta = empresaServicio.adicionar(solicitud);
-        return ResponseEntity.created(URI.create("/api/v1/empresas/" + respuesta.id()))
-                .body(respuesta);
+        ResultadoOperacionEmpresa resultado = empresaServicio.adicionar(solicitud);
+        return resultado.creado()
+                ? ResponseEntity.created(
+                        URI.create("/api/v1/empresas/" + resultado.respuesta().id()))
+                        .body(resultado.respuesta())
+                : ResponseEntity.ok(resultado.respuesta());
     }
 
     @PutMapping("/{id}")

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.PuntoVentaMapper">
+
+  <sql id="filtro">
+    <if test="busqueda != null and busqueda != ''">
+      AND (LOWER(pv.codigo) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(pv.puntoventa) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(s.codigo) LIKE LOWER(CONCAT('%', #{busqueda}, '%')))
+    </if>
+  </sql>
+
+  <select id="findById" resultType="bo.org.citior.sife.dominio.PuntoVenta">
+    SELECT pv.id, pv.sucursal_id, pv.codigo, pv.puntoventa, pv.tipo, pv.estado
+    FROM puntoventa pv
+    WHERE pv.id = #{id}
+  </select>
+
+  <select id="listar" resultType="bo.org.citior.sife.dominio.PuntoVenta">
+    SELECT pv.id, pv.sucursal_id, pv.codigo, pv.puntoventa, pv.tipo, pv.estado
+    FROM puntoventa pv
+    JOIN sucursal s ON s.id = pv.sucursal_id
+    WHERE 1 = 1
+    <include refid="filtro" />
+    ORDER BY pv.sucursal_id, pv.codigo::integer, pv.id
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <select id="listarActivos" resultType="bo.org.citior.sife.dominio.PuntoVenta">
+    SELECT pv.id, pv.sucursal_id, pv.codigo, pv.puntoventa, pv.tipo, pv.estado
+    FROM puntoventa pv
+    WHERE pv.estado = true
+    ORDER BY pv.sucursal_id, pv.codigo::integer, pv.id
+  </select>
+
+  <select id="contar" resultType="long">
+    SELECT COUNT(*)
+    FROM puntoventa pv
+    JOIN sucursal s ON s.id = pv.sucursal_id
+    WHERE 1 = 1
+    <include refid="filtro" />
+  </select>
+
+  <select id="existsBySucursalIdAndCodigo" resultType="boolean">
+    SELECT EXISTS (
+      SELECT 1 FROM puntoventa
+      WHERE sucursal_id = #{sucursalId} AND codigo = #{codigo}
+    )
+  </select>
+
+  <select id="existsBySucursalIdAndCodigoAndIdNot" resultType="boolean">
+    SELECT EXISTS (
+      SELECT 1 FROM puntoventa
+      WHERE sucursal_id = #{sucursalId}
+        AND codigo = #{codigo}
+        AND id &lt;&gt; #{id}
+    )
+  </select>
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.PuntoVenta"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO puntoventa (sucursal_id, codigo, puntoventa, tipo, estado)
+    VALUES (#{sucursalId}, #{codigo}, #{puntoventa}, #{tipo}, #{estado})
+  </insert>
+
+  <update id="update" parameterType="bo.org.citior.sife.dominio.PuntoVenta">
+    UPDATE puntoventa
+    SET sucursal_id = #{sucursalId},
+        codigo = #{codigo},
+        puntoventa = #{puntoventa},
+        tipo = #{tipo},
+        estado = #{estado}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM puntoventa WHERE id = #{id}
+  </delete>
+
+</mapper>

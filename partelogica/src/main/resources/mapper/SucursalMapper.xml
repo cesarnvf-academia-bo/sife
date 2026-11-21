@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.SucursalMapper">
+
+  <sql id="filtro">
+    <if test="busqueda != null and busqueda != ''">
+      AND (LOWER(codigo) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(sucursal) LIKE LOWER(CONCAT('%', #{busqueda}, '%')))
+    </if>
+  </sql>
+
+  <select id="findById" resultType="bo.org.citior.sife.dominio.Sucursal">
+    SELECT id, codigo, sucursal, estado
+    FROM sucursal
+    WHERE id = #{id}
+  </select>
+
+  <select id="listar" resultType="bo.org.citior.sife.dominio.Sucursal">
+    SELECT id, codigo, sucursal, estado
+    FROM sucursal
+    WHERE 1 = 1
+    <include refid="filtro" />
+    ORDER BY id
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <select id="contar" resultType="long">
+    SELECT COUNT(*)
+    FROM sucursal
+    WHERE 1 = 1
+    <include refid="filtro" />
+  </select>
+
+  <select id="existsByCodigo" resultType="boolean">
+    SELECT EXISTS (SELECT 1 FROM sucursal WHERE codigo = #{codigo})
+  </select>
+
+  <select id="existsByCodigoAndIdNot" resultType="boolean">
+    SELECT EXISTS (
+      SELECT 1 FROM sucursal
+      WHERE codigo = #{codigo} AND id &lt;&gt; #{id}
+    )
+  </select>
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.Sucursal"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO sucursal (codigo, sucursal, estado)
+    VALUES (#{codigo}, #{sucursal}, #{estado})
+  </insert>
+
+  <update id="update" parameterType="bo.org.citior.sife.dominio.Sucursal">
+    UPDATE sucursal
+    SET codigo = #{codigo},
+        sucursal = #{sucursal},
+        estado = #{estado}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM sucursal WHERE id = #{id}
+  </delete>
+
+</mapper>

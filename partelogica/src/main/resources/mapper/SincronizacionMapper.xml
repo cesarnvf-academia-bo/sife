@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.SincronizacionMapper">
+
+  <resultMap id="ejecucionResultado" type="bo.org.citior.sife.dominio.SincronizacionEjecucion">
+    <id property="id" column="id"/>
+    <result property="empresaId" column="empresa_id"/>
+    <result property="sucursalId" column="sucursal_id"/>
+    <result property="puntoventaId" column="puntoventa_id"/>
+    <result property="funcion" column="funcion"/>
+    <result property="estado" column="estado"/>
+    <result property="transaccion" column="transaccion"/>
+    <result property="mensajes" column="mensajes"/>
+    <result property="fechaHoraSiat" column="fecha_hora_siat"/>
+    <result property="error" column="error"/>
+    <result property="ejecutadoEn" column="ejecutado_en"/>
+  </resultMap>
+
+  <insert id="insertarEjecucion"
+          parameterType="bo.org.citior.sife.dominio.SincronizacionEjecucion"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO sincronizacion_ejecucion (
+        empresa_id, sucursal_id, puntoventa_id, funcion, estado,
+        transaccion, mensajes, fecha_hora_siat, error
+    ) VALUES (
+        #{empresaId}, #{sucursalId}, #{puntoventaId}, #{funcion}, #{estado},
+        #{transaccion}, CAST(#{mensajes} AS jsonb), #{fechaHoraSiat}, #{error}
+    )
+  </insert>
+
+  <select id="obtenerUltimaEjecucionExitosa" resultMap="ejecucionResultado">
+    SELECT id,
+           empresa_id,
+           sucursal_id,
+           puntoventa_id,
+           funcion,
+           estado,
+           transaccion,
+           mensajes::text AS mensajes,
+           fecha_hora_siat,
+           error,
+           ejecutado_en
+    FROM sincronizacion_ejecucion
+    WHERE empresa_id = #{empresaId}
+      AND puntoventa_id = #{puntoventaId}
+      AND funcion = #{funcion}
+      AND estado = 'EXITOSA'
+    ORDER BY id DESC
+    LIMIT 1
+  </select>
+
+  <insert id="insertarParametrica">
+    <choose>
+      <when test="funcion == 'sincronizarParametricaMotivoAnulacion'">
+        INSERT INTO sincronizacion_motivo_anulacion (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoHabitacion'">
+        INSERT INTO sincronizacion_tipo_habitacion (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoDocumentoIdentidad'">
+        INSERT INTO sincronizacion_tipo_documento_identidad (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaUnidadMedida'">
+        INSERT INTO sincronizacion_unidad_medida (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoDocumentoSector'">
+        INSERT INTO sincronizacion_tipo_documento_sector (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTiposFactura'">
+        INSERT INTO sincronizacion_tipo_factura (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarListaMensajesServicios'">
+        INSERT INTO sincronizacion_mensaje_servicio (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoMetodoPago'">
+        INSERT INTO sincronizacion_tipo_metodo_pago (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaEventosSignificativos'">
+        INSERT INTO sincronizacion_evento_significativo (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoPuntoVenta'">
+        INSERT INTO sincronizacion_tipo_punto_venta (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoEmision'">
+        INSERT INTO sincronizacion_tipo_emision (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaPaisOrigen'">
+        INSERT INTO sincronizacion_pais_origen (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+      <when test="funcion == 'sincronizarParametricaTipoMoneda'">
+        INSERT INTO sincronizacion_tipo_moneda (ejecucion_id, codigo, descripcion)
+        VALUES (#{ejecucionId}, #{codigo}, #{descripcion})
+      </when>
+    </choose>
+  </insert>
+
+  <insert id="insertarActividad">
+    INSERT INTO sincronizacion_actividad (
+        ejecucion_id, codigo_caeb, descripcion, tipo_actividad
+    ) VALUES (
+        #{ejecucionId}, #{codigoCaeb}, #{descripcion}, #{tipoActividad}
+    )
+  </insert>
+
+  <insert id="insertarFechaHora">
+    INSERT INTO sincronizacion_fecha_hora (ejecucion_id, fecha_hora_siat)
+    VALUES (#{ejecucionId}, #{fechaHoraSiat})
+  </insert>
+
+  <insert id="insertarLeyenda">
+    INSERT INTO sincronizacion_leyenda_factura (
+        ejecucion_id, codigo_actividad, descripcion_leyenda
+    ) VALUES (
+        #{ejecucionId}, #{codigoActividad}, #{descripcionLeyenda}
+    )
+  </insert>
+
+  <insert id="insertarActividadDocumentoSector">
+    INSERT INTO sincronizacion_actividad_documento_sector (
+        ejecucion_id, codigo_actividad, codigo_documento_sector, tipo_documento_sector
+    ) VALUES (
+        #{ejecucionId}, #{codigoActividad}, #{codigoDocumentoSector}, #{tipoDocumentoSector}
+    )
+  </insert>
+
+  <insert id="insertarProductoServicio"
+          parameterType="bo.org.citior.sife.dominio.catalogo.ProductoServicio"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO sincronizacion_producto_servicio (
+        ejecucion_id, codigo_actividad, codigo_producto, descripcion_producto
+    ) VALUES (
+        #{ejecucionId}, #{codigoActividad}, #{codigoProducto}, #{descripcionProducto}
+    )
+  </insert>
+
+  <insert id="insertarProductoNandina">
+    INSERT INTO sincronizacion_producto_nandina (producto_id, nandina)
+    VALUES (#{productoId}, #{nandina})
+  </insert>
+
+  <select id="listarCatalogo" resultType="bo.org.citior.sife.dominio.dto.CatalogoFila">
+    <choose>
+      <when test="tipo == 'PARAMETRICA'">
+        SELECT codigo::text AS codigo,
+               descripcion,
+               CAST(NULL AS text) AS detalle,
+               CAST(NULL AS text) AS nandina
+        FROM sincronizacion_motivo_anulacion
+        WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_habitacion WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_documento_identidad WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_unidad_medida WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_documento_sector WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_factura WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_mensaje_servicio WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_metodo_pago WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_evento_significativo WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_punto_venta WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_emision WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_pais_origen WHERE ejecucion_id = #{ejecucionId}
+        UNION ALL
+        SELECT codigo::text, descripcion, CAST(NULL AS text), CAST(NULL AS text)
+        FROM sincronizacion_tipo_moneda WHERE ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <when test="tipo == 'ACTIVIDAD'">
+        SELECT codigo_caeb AS codigo,
+               descripcion,
+               tipo_actividad AS detalle,
+               CAST(NULL AS text) AS nandina
+        FROM sincronizacion_actividad
+        WHERE ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <when test="tipo == 'FECHA_HORA'">
+        SELECT CAST('' AS text) AS codigo,
+               fecha_hora_siat AS descripcion,
+               CAST(NULL AS text) AS detalle,
+               CAST(NULL AS text) AS nandina
+        FROM sincronizacion_fecha_hora
+        WHERE ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <when test="tipo == 'LEYENDA'">
+        SELECT codigo_actividad AS codigo,
+               descripcion_leyenda AS descripcion,
+               CAST(NULL AS text) AS detalle,
+               CAST(NULL AS text) AS nandina
+        FROM sincronizacion_leyenda_factura
+        WHERE ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <when test="tipo == 'ACTIVIDAD_DOCUMENTO_SECTOR'">
+        SELECT codigo_actividad AS codigo,
+               codigo_documento_sector::text AS descripcion,
+               tipo_documento_sector AS detalle,
+               CAST(NULL AS text) AS nandina
+        FROM sincronizacion_actividad_documento_sector
+        WHERE ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <when test="tipo == 'PRODUCTO_SERVICIO'">
+        SELECT p.codigo_actividad AS codigo,
+               p.descripcion_producto AS descripcion,
+               p.codigo_producto::text AS detalle,
+               n.nandina
+        FROM sincronizacion_producto_servicio p
+        LEFT JOIN sincronizacion_producto_nandina n ON n.producto_id = p.id
+        WHERE p.ejecucion_id = #{ejecucionId}
+        ORDER BY codigo, descripcion, detalle, nandina
+      </when>
+      <otherwise>
+        SELECT CAST(NULL AS text) AS codigo,
+               CAST(NULL AS text) AS descripcion,
+               CAST(NULL AS text) AS detalle,
+               CAST(NULL AS text) AS nandina
+        WHERE FALSE
+      </otherwise>
+    </choose>
+  </select>
+
+</mapper>

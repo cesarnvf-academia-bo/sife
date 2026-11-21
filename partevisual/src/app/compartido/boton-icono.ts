@@ -12,6 +12,7 @@ type VarianteBoton = 'primario' | 'secundario' | 'fantasma';
       [class]="clases()"
       [attr.aria-label]="etiqueta()"
       [attr.title]="titulo() || etiqueta()"
+      [disabled]="deshabilitado()"
       (click)="accion.emit()"
     >
       <sife-icono [nombre]="icono()" [tamano]="tamanoIcono()" />
@@ -28,6 +29,7 @@ export class BotonIcono {
   readonly texto = input('');
   readonly variante = input<VarianteBoton>('fantasma');
   readonly tamanoIcono = input(20);
+  readonly deshabilitado = input(false);
   readonly accion = output<void>();
 
   protected readonly clases = computed(() => {

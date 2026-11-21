@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.EmpresaMapper">
+
+  <select id="findById" resultType="bo.org.citior.sife.dominio.Empresa">
+    SELECT id, nit, razon_social AS razonsocial, codigo_sistema, modalidad, ambiente,
+           ruta_codigo, ruta_sincronizacion, ruta_operacion, ruta_compraventa,
+           token, ruta_firma_digital, clave_firma_digital
+    FROM empresa
+    WHERE id = #{id}
+  </select>
+
+  <insert id="insert" parameterType="bo.org.citior.sife.dominio.Empresa">
+    INSERT INTO empresa (
+        id, nit, razon_social, codigo_sistema, modalidad, ambiente,
+        ruta_codigo, ruta_sincronizacion, ruta_operacion, ruta_compraventa,
+        token, ruta_firma_digital, clave_firma_digital
+    ) VALUES (
+        #{id}, #{nit}, #{razonsocial}, #{codigoSistema}, #{modalidad}, #{ambiente},
+        #{rutaCodigo}, #{rutaSincronizacion}, #{rutaOperacion}, #{rutaCompraventa},
+        #{token}, #{rutaFirmaDigital}, #{claveFirmaDigital}
+    )
+  </insert>
+
+  <update id="update" parameterType="bo.org.citior.sife.dominio.Empresa">
+    UPDATE empresa
+    <set>
+      <if test="nit != null">nit = #{nit},</if>
+      <if test="razonsocial != null">razon_social = #{razonsocial},</if>
+      <if test="codigoSistema != null">codigo_sistema = #{codigoSistema},</if>
+      <if test="modalidad != null">modalidad = #{modalidad},</if>
+      <if test="ambiente != null">ambiente = #{ambiente},</if>
+      <if test="rutaCodigo != null">ruta_codigo = #{rutaCodigo},</if>
+      <if test="rutaSincronizacion != null">ruta_sincronizacion = #{rutaSincronizacion},</if>
+      <if test="rutaOperacion != null">ruta_operacion = #{rutaOperacion},</if>
+      <if test="rutaCompraventa != null">ruta_compraventa = #{rutaCompraventa},</if>
+      <if test="token != null and token != ''">token = #{token},</if>
+      <if test="rutaFirmaDigital != null">ruta_firma_digital = #{rutaFirmaDigital},</if>
+      <if test="claveFirmaDigital != null and claveFirmaDigital != ''">clave_firma_digital = #{claveFirmaDigital},</if>
+    </set>
+    WHERE id = #{id}
+  </update>
+
+</mapper>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.CuisMapper">
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.Cuis"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO cuis (
+        empresa_id, sucursal_id, puntoventa_id, codigo_sucursal,
+        codigo_punto_venta, cuis, fecha_vigencia, transaccion, mensajes, estado
+    ) VALUES (
+        #{empresaId}, #{sucursalId}, #{puntoventaId}, #{codigoSucursal},
+        #{codigoPuntoVenta}, #{cuis}, #{fechaVigencia}, #{transaccion}, #{mensajes}, FALSE
+    )
+  </insert>
+
+  <select id="obtenerVigente" resultType="bo.org.citior.sife.dominio.Cuis">
+    SELECT c.id,
+           c.empresa_id AS empresaId,
+           c.sucursal_id AS sucursalId,
+           c.puntoventa_id AS puntoventaId,
+           c.codigo_sucursal AS codigoSucursal,
+           c.codigo_punto_venta AS codigoPuntoVenta,
+           c.cuis,
+           c.fecha_vigencia AS fechaVigencia,
+           c.transaccion,
+           c.mensajes,
+           c.estado
+    FROM cuis c
+    WHERE c.empresa_id = #{empresaId}
+      AND c.puntoventa_id = #{puntoventaId}
+      AND c.estado = TRUE
+      AND c.cuis IS NOT NULL
+      AND btrim(c.cuis) &lt;&gt; ''
+    ORDER BY c.id DESC
+    LIMIT 1
+  </select>
+
+  <update id="activarVigente">
+    WITH candidato AS (
+      SELECT id
+      FROM cuis
+      WHERE empresa_id = #{empresaId}
+        AND puntoventa_id = #{puntoventaId}
+        AND transaccion = TRUE
+        AND fecha_vigencia IS NOT NULL
+        AND fecha_vigencia > CURRENT_TIMESTAMP
+      ORDER BY fecha_vigencia DESC, id DESC
+      LIMIT 1
+    )
+    UPDATE cuis
+    SET estado = (id IN (SELECT id FROM candidato))
+    WHERE empresa_id = #{empresaId}
+      AND puntoventa_id = #{puntoventaId}
+  </update>
+
+</mapper>
