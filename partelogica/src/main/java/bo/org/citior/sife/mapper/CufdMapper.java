@@ -9,6 +9,10 @@ public interface CufdMapper {
 
     void insert(Cufd cufd);
 
+    Cufd obtenerVigente(
+            @Param("empresaId") Long empresaId,
+            @Param("puntoventaId") Long puntoventaId);
+
     void activarVigente(
             @Param("empresaId") Long empresaId,
             @Param("puntoventaId") Long puntoventaId);

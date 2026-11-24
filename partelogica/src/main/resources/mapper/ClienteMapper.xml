@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.ClienteMapper">
+
+  <sql id="filtro">
+    <if test="busqueda != null and busqueda != ''">
+      AND (LOWER(codigo_interno) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(cliente) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(dit) LIKE LOWER(CONCAT('%', #{busqueda}, '%'))
+        OR LOWER(correo) LIKE LOWER(CONCAT('%', #{busqueda}, '%')))
+    </if>
+  </sql>
+
+  <select id="findById" resultType="bo.org.citior.sife.dominio.Cliente">
+    SELECT id, codigo_interno, cliente, dit, tipo, correo
+    FROM cliente
+    WHERE id = #{id}
+  </select>
+
+  <select id="listar" resultType="bo.org.citior.sife.dominio.Cliente">
+    SELECT id, codigo_interno, cliente, dit, tipo, correo
+    FROM cliente
+    WHERE 1 = 1
+    <include refid="filtro" />
+    ORDER BY id
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <select id="contar" resultType="long">
+    SELECT COUNT(*)
+    FROM cliente
+    WHERE 1 = 1
+    <include refid="filtro" />
+  </select>
+
+  <select id="existsByCodigoInterno" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1 FROM cliente WHERE codigo_interno = #{codigoInterno}
+    )
+  </select>
+
+  <select id="existsByCodigoInternoAndIdNot" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1
+        FROM cliente
+        WHERE codigo_interno = #{codigoInterno}
+          AND id &lt;&gt; #{id}
+    )
+  </select>
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.Cliente"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO cliente (codigo_interno, cliente, dit, tipo, correo)
+    VALUES (#{codigoInterno}, #{cliente}, #{dit}, #{tipo}, #{correo})
+  </insert>
+
+  <update id="update" parameterType="bo.org.citior.sife.dominio.Cliente">
+    UPDATE cliente
+    SET codigo_interno = #{codigoInterno},
+        cliente = #{cliente},
+        dit = #{dit},
+        tipo = #{tipo},
+        correo = #{correo}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM cliente WHERE id = #{id}
+  </delete>
+
+  <select id="listarActivos" resultType="bo.org.citior.sife.dominio.Cliente">
+    SELECT id, codigo_interno, cliente, dit, tipo, correo
+    FROM cliente
+    WHERE 1 = 1
+    ORDER BY id
+    LIMIT 1000
+  </select>
+
+</mapper>

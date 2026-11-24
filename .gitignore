@@ -1,2 +1,5 @@
 videos/
 *.mp4
+recursos/gmail.md
+generarfirma/*.p12
+generarfirma/*.pem

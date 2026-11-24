@@ -1,0 +1,805 @@
+<section class="space-y-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-left">
+      <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Factura</h1>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        Administra las facturas emitidas.
+      </p>
+    </div>
+    <sife-boton-icono
+      icono="agregar"
+      etiqueta="Emitir factura"
+      texto="Emitir"
+      variante="primario"
+      (accion)="emitir()"
+    />
+  </header>
+
+  <sife-modal
+    [abierto]="modalAbierto()"
+    [titulo]="tituloModal()"
+    subtitulo="Complete los datos de la factura."
+    ancho="xl"
+    (cerrar)="cancelar()"
+  >
+    <form
+      [formGroup]="formulario"
+      autocomplete="off"
+      class="grid grid-cols-1 gap-4 md:grid-cols-12"
+    >
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Sucursal
+        </span>
+        <select
+          formControlName="sucursalId"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione una sucursal</option>
+          @for (opcion of catalogos().sucursales; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (formulario.controls.sucursalId.touched && formulario.controls.sucursalId.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione una sucursal.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Punto de venta
+        </span>
+        <select
+          formControlName="puntoventaId"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Sin punto de venta</option>
+          @for (opcion of catalogos().puntosVenta; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Cliente
+        </span>
+        <select
+          formControlName="clienteId"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione un cliente</option>
+          @for (opcion of catalogos().clientes; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (formulario.controls.clienteId.touched && formulario.controls.clienteId.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione un cliente.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de documento de identidad
+        </span>
+        <select
+          formControlName="codigoTipoDocumentoIdentidad"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione un tipo de documento</option>
+          @for (opcion of catalogos().tiposDocumentoIdentidad; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (
+          formulario.controls.codigoTipoDocumentoIdentidad.touched &&
+          formulario.controls.codigoTipoDocumentoIdentidad.invalid
+        ) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione un tipo de documento.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Método de pago
+        </span>
+        <select
+          formControlName="codigoMetodoPago"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione un método de pago</option>
+          @for (opcion of catalogos().metodosPago; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (formulario.controls.codigoMetodoPago.touched && formulario.controls.codigoMetodoPago.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione un método de pago.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Moneda
+        </span>
+        <select
+          formControlName="codigoMoneda"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione una moneda</option>
+          @for (opcion of catalogos().monedas; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (formulario.controls.codigoMoneda.touched && formulario.controls.codigoMoneda.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione una moneda.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código de ambiente
+        </span>
+        <input
+          type="number"
+          min="1"
+          formControlName="codigoAmbiente"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de emisión
+        </span>
+        <input
+          type="number"
+          min="1"
+          formControlName="codigoEmision"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Modalidad
+        </span>
+        <input
+          type="number"
+          min="1"
+          formControlName="codigoModalidad"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de factura
+        </span>
+        <input
+          type="number"
+          min="1"
+          max="2"
+          formControlName="tipoFacturaDocumento"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Nombre o razón social
+        </span>
+        <input
+          type="text"
+          formControlName="nombreRazonSocial"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (
+          formulario.controls.nombreRazonSocial.touched &&
+          formulario.controls.nombreRazonSocial.invalid
+        ) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese el nombre o razón social.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Número de documento
+        </span>
+        <input
+          type="text"
+          formControlName="numeroDocumento"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.numeroDocumento.touched && formulario.controls.numeroDocumento.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese el número de documento.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Complemento
+        </span>
+        <input
+          type="text"
+          formControlName="complemento"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Municipio
+        </span>
+        <input
+          type="text"
+          formControlName="municipio"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.municipio.touched && formulario.controls.municipio.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese el municipio.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-8">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Dirección
+        </span>
+        <input
+          type="text"
+          formControlName="direccion"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.direccion.touched && formulario.controls.direccion.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese la dirección.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Teléfono
+        </span>
+        <input
+          type="text"
+          formControlName="telefono"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Número de tarjeta
+        </span>
+        <input
+          type="text"
+          formControlName="numeroTarjeta"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Gift card
+        </span>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          formControlName="montoGiftCard"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Descuento adicional
+        </span>
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          formControlName="descuentoAdicional"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código excepción
+        </span>
+        <input
+          type="number"
+          min="0"
+          max="1"
+          formControlName="codigoExcepcion"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          CAFC
+        </span>
+        <input
+          type="text"
+          formControlName="cafc"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de cambio
+        </span>
+        <input
+          type="number"
+          step="0.000001"
+          min="0.000001"
+          formControlName="tipoCambio"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.tipoCambio.touched && formulario.controls.tipoCambio.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un tipo de cambio válido.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Leyenda
+        </span>
+        <input
+          type="text"
+          formControlName="leyenda"
+          maxlength="200"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.leyenda.touched && formulario.controls.leyenda.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese una leyenda.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-3">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Usuario
+        </span>
+        <input
+          type="text"
+          formControlName="usuario"
+          maxlength="100"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.usuario.touched && formulario.controls.usuario.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un usuario.
+          </span>
+        }
+      </label>
+
+      <div class="md:col-span-12 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+          <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Detalle</h3>
+          <div class="flex flex-wrap items-center gap-1">
+            <sife-boton-icono
+              icono="agregar"
+              etiqueta="Agregar línea"
+              texto="Agregar línea"
+              variante="secundario"
+              (accion)="agregarLinea()"
+            />
+            <sife-boton-icono
+              icono="borrar"
+              etiqueta="Quitar línea"
+              texto="Quitar línea"
+              variante="fantasma"
+              [deshabilitado]="lineas.length <= 1"
+              (accion)="quitarLinea()"
+            />
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+              <tr>
+                <th class="px-2 py-3 font-semibold">#</th>
+                <th class="px-2 py-3 font-semibold">Actividad económica</th>
+                <th class="px-2 py-3 font-semibold">Cód. producto SIN</th>
+                <th class="px-2 py-3 font-semibold">Código producto</th>
+                <th class="px-2 py-3 font-semibold">Descripción</th>
+                <th class="px-2 py-3 font-semibold">Cantidad</th>
+                <th class="px-2 py-3 font-semibold">Unidad</th>
+                <th class="px-2 py-3 font-semibold">Precio unitario</th>
+                <th class="px-2 py-3 font-semibold">Descuento</th>
+                <th class="px-2 py-3 font-semibold">Subtotal</th>
+                <th class="px-2 py-3 font-semibold">N° serie</th>
+                <th class="px-2 py-3 font-semibold">N° IMEI</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="detalle" class="divide-y divide-slate-200 dark:divide-slate-800">
+              @for (linea of lineas; track $index; let i = $index) {
+                <tr class="text-slate-700 dark:text-slate-200" [formGroupName]="i">
+                  <td class="px-2 py-2 align-top">{{ i + 1 }}</td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="text"
+                      formControlName="actividadEconomica"
+                      class="w-full min-w-36 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.actividadEconomica.touched && linea.controls.actividadEconomica.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      min="1"
+                      formControlName="codigoProductoSin"
+                      class="w-full min-w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.codigoProductoSin.touched && linea.controls.codigoProductoSin.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="text"
+                      formControlName="codigoProducto"
+                      class="w-full min-w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.codigoProducto.touched && linea.controls.codigoProducto.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="text"
+                      formControlName="descripcion"
+                      class="w-full min-w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.descripcion.touched && linea.controls.descripcion.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.000001"
+                      formControlName="cantidad"
+                      class="w-full min-w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.cantidad.touched && linea.controls.cantidad.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      min="1"
+                      formControlName="unidadMedida"
+                      class="w-full min-w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.unidadMedida.touched && linea.controls.unidadMedida.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0.000001"
+                      formControlName="precioUnitario"
+                      class="w-full min-w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                    @if (linea.controls.precioUnitario.touched && linea.controls.precioUnitario.invalid) {
+                      <span class="mt-1 block text-xs text-red-600 dark:text-red-400">Requerido.</span>
+                    }
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      formControlName="montoDescuento"
+                      class="w-full min-w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="number"
+                      step="0.01"
+                      readonly
+                      formControlName="subTotal"
+                      class="w-full min-w-28 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="text"
+                      formControlName="numeroSerie"
+                      class="w-full min-w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                  </td>
+                  <td class="px-2 py-2 align-top">
+                    <input
+                      type="text"
+                      formControlName="numeroImei"
+                      class="w-full min-w-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+                    />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 md:col-span-12 dark:border-slate-800">
+        <sife-boton-icono
+          icono="actualizar"
+          etiqueta="Emitir factura"
+          texto="Emitir"
+          variante="primario"
+          [deshabilitado]="guardando()"
+          (accion)="guardar()"
+        />
+        <sife-boton-icono
+          icono="limpiar"
+          etiqueta="Cancelar emisión"
+          texto="Cancelar"
+          variante="fantasma"
+          [deshabilitado]="guardando()"
+          (accion)="cancelar()"
+        />
+      </div>
+    </form>
+  </sife-modal>
+
+  <sife-modal
+    [abierto]="modalAnulacionAbierto()"
+    [titulo]="tituloAnulacion()"
+    subtitulo="Seleccione el motivo de anulación."
+    ancho="md"
+    (cerrar)="cancelarAnulacion()"
+  >
+    <form
+      [formGroup]="anulacionForm"
+      autocomplete="off"
+      class="grid grid-cols-1 gap-4 md:grid-cols-12"
+    >
+      <label class="block md:col-span-12">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Motivo de anulación
+        </span>
+        <select
+          formControlName="codigoMotivo"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          <option value="">Seleccione un motivo</option>
+          @for (opcion of catalogos().motivosAnulacion; track opcion.codigo) {
+            <option [ngValue]="opcion.codigo">{{ opcion.codigo }} - {{ opcion.descripcion }}</option>
+          }
+        </select>
+        @if (anulacionForm.controls.codigoMotivo.touched && anulacionForm.controls.codigoMotivo.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione un motivo de anulación.
+          </span>
+        }
+      </label>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 md:col-span-12 dark:border-slate-800">
+        <sife-boton-icono
+          icono="borrar"
+          etiqueta="Anular factura"
+          texto="Anular"
+          variante="primario"
+          [deshabilitado]="guardando()"
+          (accion)="confirmarAnulacion()"
+        />
+        <sife-boton-icono
+          icono="limpiar"
+          etiqueta="Cancelar anulación"
+          texto="Cancelar"
+          variante="fantasma"
+          [deshabilitado]="guardando()"
+          (accion)="cancelarAnulacion()"
+        />
+      </div>
+    </form>
+  </sife-modal>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        (keyup.enter)="buscar()"
+        placeholder="Buscar por número de factura, CUF o cliente"
+        class="w-80 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      />
+      <sife-boton-icono
+        icono="buscar"
+        etiqueta="Buscar facturas"
+        texto="Buscar"
+        variante="secundario"
+        (accion)="buscar()"
+      />
+      <sife-boton-icono
+        icono="limpiar"
+        etiqueta="Limpiar búsqueda"
+        texto="Limpiar"
+        variante="fantasma"
+        (accion)="limpiar()"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      Mostrar
+      <select
+        [value]="tamano()"
+        (change)="cambiarTamano($any($event.target).value)"
+        class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      >
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        <tr>
+          <th class="w-32 px-4 py-3 font-semibold">N° factura</th>
+          <th class="px-4 py-3 font-semibold">Cliente</th>
+          <th class="w-44 px-4 py-3 font-semibold">Fecha emisión</th>
+          <th class="w-28 px-4 py-3 font-semibold">Total</th>
+          <th class="w-32 px-4 py-3 font-semibold">Estado</th>
+          <th class="w-64 px-4 py-3 font-semibold">Respuesta</th>
+          <th class="w-48 px-4 py-3 font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+        @for (factura of facturas(); track factura.id) {
+          <tr class="text-slate-700 dark:text-slate-200">
+            <td class="px-4 py-3">{{ factura.numeroFactura }}</td>
+            <td class="px-4 py-3">
+              <div class="font-medium">{{ factura.clienteNombreRazonSocial }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">
+                {{ factura.clienteCodigoInterno }}
+              </div>
+            </td>
+            <td class="px-4 py-3">{{ factura.fechaEmision }}</td>
+            <td class="px-4 py-3">{{ formatoMonto(factura.montoTotal) }}</td>
+            <td class="px-4 py-3">
+              <span
+                class="rounded-full px-2 py-0.5 text-xs font-medium"
+                [class.bg-emerald-100]="factura.estado === 'EMITIDA'"
+                [class.text-emerald-700]="factura.estado === 'EMITIDA'"
+                [class.dark:bg-emerald-950]="factura.estado === 'EMITIDA'"
+                [class.dark:text-emerald-300]="factura.estado === 'EMITIDA'"
+                [class.bg-rose-100]="factura.estado === 'ANULADA'"
+                [class.text-rose-700]="factura.estado === 'ANULADA'"
+                [class.dark:bg-rose-950]="factura.estado === 'ANULADA'"
+                [class.dark:text-rose-300]="factura.estado === 'ANULADA'"
+                [class.bg-sky-100]="factura.estado === 'REVERTIDA'"
+                [class.text-sky-700]="factura.estado === 'REVERTIDA'"
+                [class.dark:bg-sky-950]="factura.estado === 'REVERTIDA'"
+                [class.dark:text-sky-300]="factura.estado === 'REVERTIDA'"
+                [class.bg-slate-200]="factura.estado === 'RECHAZADA'"
+                [class.text-slate-600]="factura.estado === 'RECHAZADA'"
+                [class.dark:bg-slate-800]="factura.estado === 'RECHAZADA'"
+                [class.dark:text-slate-300]="factura.estado === 'RECHAZADA'"
+              >
+                {{ factura.estado }}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <div class="font-medium">{{ factura.respuestaCodigoEstado ?? '—' }}</div>
+              <div class="truncate text-xs text-slate-500 dark:text-slate-400" [title]="factura.respuestaCodigoDescripcion || ''">
+                {{ factura.respuestaCodigoDescripcion || 'Sin respuesta' }}
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1">
+                <sife-boton-icono
+                  icono="documentos"
+                  etiqueta="Ver XML de la factura"
+                  texto="Ver"
+                  variante="fantasma"
+                  [deshabilitado]="cargando()"
+                  (accion)="verXml(factura)"
+                />
+                <sife-boton-icono
+                  icono="borrar"
+                  etiqueta="Anular factura"
+                  texto="Anular"
+                  variante="fantasma"
+                  [deshabilitado]="factura.estado !== 'EMITIDA' || cargando()"
+                  (accion)="anular(factura)"
+                />
+                <sife-boton-icono
+                  icono="actualizar"
+                  etiqueta="Revertir anulación"
+                  texto="Revertir"
+                  variante="fantasma"
+                  [deshabilitado]="factura.estado !== 'ANULADA' || cargando()"
+                  (accion)="revertir(factura)"
+                />
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+              No hay facturas registradas.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-800"
+    >
+      <span class="text-sm text-slate-600 dark:text-slate-400">
+        Mostrando {{ desde() }} de {{ total() }}
+      </span>
+      <div class="flex gap-1">
+        <sife-boton-icono
+          icono="primero"
+          etiqueta="Primera página"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="primero()"
+        />
+        <sife-boton-icono
+          icono="anterior"
+          etiqueta="Página anterior"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="anterior()"
+        />
+        <sife-boton-icono
+          icono="siguiente"
+          etiqueta="Página siguiente"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="siguiente()"
+        />
+        <sife-boton-icono
+          icono="ultimo"
+          etiqueta="Última página"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="ultimo()"
+        />
+      </div>
+    </footer>
+  </div>
+</section>

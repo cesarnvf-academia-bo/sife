@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.FacturaDetalleMapper">
+
+  <insert id="insertarLote">
+    INSERT INTO detalle (
+        factura_id, linea, actividad_economica, codigo_producto_sin, codigo_producto,
+        descripcion, cantidad, unidad_medida, precio_unitario, monto_descuento,
+        sub_total, numero_serie, numero_imei
+    ) VALUES
+    <foreach collection="detalles" item="detalle" separator=",">
+      (
+        #{facturaId}, #{detalle.linea}, #{detalle.actividadEconomica}, #{detalle.codigoProductoSin},
+        #{detalle.codigoProducto}, #{detalle.descripcion}, #{detalle.cantidad}, #{detalle.unidadMedida},
+        #{detalle.precioUnitario}, #{detalle.montoDescuento}, #{detalle.subTotal},
+        #{detalle.numeroSerie}, #{detalle.numeroImei}
+      )
+    </foreach>
+  </insert>
+
+  <select id="listarPorFacturaId" resultType="bo.org.citior.sife.dominio.FacturaDetalle">
+    SELECT id,
+           factura_id AS facturaId,
+           linea,
+           actividad_economica AS actividadEconomica,
+           codigo_producto_sin AS codigoProductoSin,
+           codigo_producto AS codigoProducto,
+           descripcion,
+           cantidad,
+           unidad_medida AS unidadMedida,
+           precio_unitario AS precioUnitario,
+           monto_descuento AS montoDescuento,
+           sub_total AS subTotal,
+           numero_serie AS numeroSerie,
+           numero_imei AS numeroImei
+    FROM detalle
+    WHERE factura_id = #{facturaId}
+    ORDER BY linea
+  </select>
+
+</mapper>

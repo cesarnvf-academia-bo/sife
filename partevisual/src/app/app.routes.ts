@@ -19,10 +19,27 @@ export const rutas: Routes = [
     data: { miga: 'Sucursal' },
   },
   {
+    path: 'cliente',
+    loadComponent: () =>
+      import('./paginas/cliente/cliente').then((modulo) => modulo.Cliente),
+    data: { miga: 'Cliente' },
+  },
+  {
+    path: 'producto',
+    loadComponent: () =>
+      import('./paginas/producto/producto').then((modulo) => modulo.Producto),
+    data: { miga: 'Producto' },
+  },
+  {
     path: 'puntoventa',
     loadComponent: () =>
       import('./paginas/puntoventa/puntoventa').then((modulo) => modulo.PuntoVenta),
     data: { miga: 'Punto de venta' },
+  },
+  {
+    path: 'factura',
+    loadComponent: () => import('./paginas/factura/factura').then((modulo) => modulo.Factura),
+    data: { miga: 'Factura' },
   },
   { path: '**', redirectTo: 'inicio' },
 ];

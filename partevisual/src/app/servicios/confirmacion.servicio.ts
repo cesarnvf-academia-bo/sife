@@ -19,4 +19,27 @@ export class ConfirmacionServicio {
 
     return resultado.isConfirmed;
   }
+
+  async confirmar(
+    titulo: string,
+    mensaje: string,
+    confirmarTexto: string,
+    entidad: string,
+  ): Promise<boolean> {
+    const resultado = await Swal.fire({
+      title: titulo,
+      text: mensaje,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0284c7',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: confirmarTexto,
+      cancelButtonText: 'Cancelar',
+      confirmButtonAriaLabel: `${confirmarTexto} ${entidad}`,
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    return resultado.isConfirmed;
+  }
 }

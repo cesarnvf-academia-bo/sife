@@ -1,5 +1,6 @@
 package bo.org.citior.sife.servicio;
 
+import bo.gob.impuesto.siat.codigos.MensajeServicio;
 import bo.gob.impuesto.siat.codigos.ObjectFactory;
 import bo.gob.impuesto.siat.codigos.RespuestaCuis;
 import bo.gob.impuesto.siat.codigos.ServicioFacturacionCodigos;
@@ -14,6 +15,7 @@ import bo.org.citior.sife.excepcion.SiatNoDisponibleExcepcion;
 import bo.org.citior.sife.excepcion.TokenSiatNoConfiguradoExcepcion;
 import bo.org.citior.sife.mapper.EmpresaMapper;
 import bo.org.citior.sife.siat.ClienteSiatFactory;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 public class ObtenerCuisServicio {
 
     private static final int CODIGO_SUCURSAL = 0;
+    private static final int CODIGO_CUIS_VIGENTE_EXISTENTE = 980;
 
     private final EmpresaMapper empresaMapper;
     private final ClienteSiatFactory clienteSiatFactory;
@@ -78,8 +81,8 @@ public class ObtenerCuisServicio {
                     respuesta.getFechaVigencia() == null
                             ? null
                             : respuesta.getFechaVigencia().toXMLFormat(),
-                    Boolean.TRUE.equals(respuesta.isTransaccion()),
-                    respuesta.getMensajesList().stream()
+                    esTransaccionValida(respuesta),
+                    mensajes(respuesta).stream()
                             .map(mensaje -> new CuisRespuesta.MensajeCuis(
                                     mensaje.getCodigo(),
                                     mensaje.getDescripcion()))
@@ -88,6 +91,26 @@ public class ObtenerCuisServicio {
             throw new SiatNoDisponibleExcepcion(
                     "FacturacionCodigos", mensajeError(excepcion));
         }
+    }
+
+    private boolean esTransaccionValida(RespuestaCuis respuesta) {
+        if (Boolean.TRUE.equals(respuesta.isTransaccion())) {
+            return true;
+        }
+
+        String cuis = respuesta.getCodigo();
+        return cuis != null
+                && !cuis.isBlank()
+                && mensajes(respuesta).stream()
+                        .anyMatch(mensaje -> mensaje != null
+                                && Integer.valueOf(CODIGO_CUIS_VIGENTE_EXISTENTE)
+                                        .equals(mensaje.getCodigo()));
+    }
+
+    private List<MensajeServicio> mensajes(RespuestaCuis respuesta) {
+        return respuesta.getMensajesList() == null
+                ? List.of()
+                : respuesta.getMensajesList();
     }
 
     private int parsearEntero(Long empresaId, String campo, String valor) {

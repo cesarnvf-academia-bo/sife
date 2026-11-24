@@ -5,6 +5,22 @@ spring:
     url: ${BD_URL:jdbc:postgresql://localhost:5432/sife}
     username: ${BD_USUARIO:postgres}
     password: ${BD_CLAVE:}
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        max.block.ms: 3000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 6000
+    consumer:
+      group-id: sife-factura-correo
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    listener:
+      auto-startup: true
 mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
   type-aliases-package: bo.org.citior.sife.dominio
@@ -19,8 +35,17 @@ siat:
   sincronizacion-url: https://pilotosiatservicios.impuestos.gob.bo/v2/FacturacionSincronizacion
   operaciones-url: https://pilotosiatservicios.impuestos.gob.bo/v2/FacturacionOperaciones
   compraventa-url: https://pilotosiatservicios.impuestos.gob.bo/v2/ServicioFacturacionCompraVenta
-  tiempo-conexion-ms: 5000
-  tiempo-respuesta-ms: 15000
+  tiempo-conexion-ms: 10000
+  tiempo-respuesta-ms: 60000
+
+correo:
+  archivo-credenciales: ${CORREO_ARCHIVO_CREDENCIALES:recursos/gmail.md}
+  host: smtp.gmail.com
+  puerto: 587
+  remitente: ${CORREO_REMITENTE:}
+  asunto: ${CORREO_ASUNTO:Factura electrónica aprobada}
+  topico: ${CORREO_TOPICO:sife.factura.aprobada}
+  codigo-aprobado: ${CORREO_CODIGO_APROBADO:908}
 
 springdoc:
   api-docs:

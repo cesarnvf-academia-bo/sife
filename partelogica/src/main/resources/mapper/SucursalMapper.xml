@@ -64,4 +64,11 @@
     DELETE FROM sucursal WHERE id = #{id}
   </delete>
 
+  <select id="listarActivos" resultType="bo.org.citior.sife.dominio.Sucursal">
+    SELECT id, codigo, sucursal, estado
+    FROM sucursal
+    WHERE estado = TRUE
+    ORDER BY id
+  </select>
+
 </mapper>

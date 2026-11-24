@@ -72,6 +72,29 @@ CREATE UNIQUE INDEX ux_cuis_activo
 CREATE UNIQUE INDEX ux_cufd_activo
     ON cufd (empresa_id, puntoventa_id) WHERE estado;
 
+CREATE TABLE cliente (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codigo_interno VARCHAR(50) NOT NULL,
+    cliente VARCHAR(250) NOT NULL,
+    dit VARCHAR(50) NOT NULL,
+    tipo INTEGER NOT NULL,
+    correo VARCHAR(250) NOT NULL,
+    CONSTRAINT uq_cliente_codigo_interno UNIQUE (codigo_interno),
+    CONSTRAINT ck_cliente_tipo CHECK (tipo BETWEEN 1 AND 5)
+);
+
+CREATE TABLE producto (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    codigo_interno VARCHAR(50) NOT NULL,
+    producto VARCHAR(250) NOT NULL,
+    precio_unitario NUMERIC(12,2) NOT NULL,
+    codigo_actividad VARCHAR(20) NOT NULL,
+    codigo_producto BIGINT NOT NULL,
+    unidad_medida INTEGER NOT NULL,
+    CONSTRAINT uq_producto_codigo_interno UNIQUE (codigo_interno),
+    CONSTRAINT ck_producto_precio_unitario CHECK (precio_unitario >= 0)
+);
+
 CREATE TABLE sincronizacion_ejecucion (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     empresa_id BIGINT NOT NULL REFERENCES empresa(id),
@@ -280,3 +303,119 @@ CREATE TABLE sincronizacion_producto_nandina (
     nandina VARCHAR(100) NOT NULL,
     CONSTRAINT uq_sinc_producto_nandina UNIQUE (producto_id, nandina)
 );
+
+CREATE TABLE factura (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+    empresa_id BIGINT NOT NULL REFERENCES empresa(id),
+    sucursal_id BIGINT NOT NULL REFERENCES sucursal(id),
+    puntoventa_id BIGINT REFERENCES puntoventa(id),
+    cuis_id BIGINT NOT NULL REFERENCES cuis(id),
+    cufd_id BIGINT NOT NULL REFERENCES cufd(id),
+
+    nit_emisor BIGINT NOT NULL,
+    razon_social_emisor VARCHAR(200) NOT NULL,
+    municipio VARCHAR(25) NOT NULL,
+    telefono VARCHAR(25),
+    numero_factura BIGINT NOT NULL,
+    cuf VARCHAR(100) NOT NULL,
+    cufd VARCHAR(100) NOT NULL,
+    codigo_sucursal INTEGER NOT NULL,
+    direccion VARCHAR(500) NOT NULL,
+    codigo_punto_venta INTEGER,
+    fecha_emision TIMESTAMPTZ(3) NOT NULL,
+    nombre_razon_social VARCHAR(500),
+    codigo_tipo_documento_identidad INTEGER NOT NULL,
+    numero_documento VARCHAR(20) NOT NULL,
+    complemento VARCHAR(5),
+    codigo_cliente VARCHAR(100) NOT NULL,
+    codigo_metodo_pago INTEGER NOT NULL,
+    numero_tarjeta VARCHAR(16),
+    monto_total NUMERIC(17,2) NOT NULL,
+    monto_total_sujeto_iva NUMERIC(17,2) NOT NULL,
+    monto_gift_card NUMERIC(17,2),
+    descuento_adicional NUMERIC(17,2),
+    codigo_excepcion INTEGER,
+    cafc VARCHAR(50),
+    codigo_moneda INTEGER NOT NULL,
+    tipo_cambio NUMERIC(17,2) NOT NULL,
+    monto_total_moneda NUMERIC(17,2) NOT NULL,
+    leyenda VARCHAR(200) NOT NULL,
+    usuario VARCHAR(100) NOT NULL,
+    codigo_documento_sector INTEGER NOT NULL DEFAULT 1,
+
+    codigo_ambiente INTEGER NOT NULL,
+    codigo_emision INTEGER NOT NULL,
+    codigo_modalidad INTEGER NOT NULL,
+    tipo_factura_documento INTEGER NOT NULL,
+
+    xml_firmado TEXT,
+    hash_archivo VARCHAR(64),
+    fecha_envio TIMESTAMPTZ(3),
+    archivo_gzip BYTEA,
+
+    respuesta_codigo_descripcion VARCHAR(500),
+    respuesta_codigo_estado INTEGER,
+    respuesta_codigo_recepcion VARCHAR(100),
+    respuesta_transaccion BOOLEAN,
+    respuesta_mensajes JSONB,
+    respuesta_error TEXT,
+
+    estado VARCHAR(20) NOT NULL DEFAULT 'EMITIDA',
+
+    fecha_anulacion TIMESTAMPTZ(3),
+    codigo_motivo_anulacion INTEGER,
+    anulacion_transaccion BOOLEAN,
+    anulacion_codigo_estado INTEGER,
+    anulacion_codigo_descripcion VARCHAR(500),
+    anulacion_mensajes JSONB,
+
+    fecha_reversion TIMESTAMPTZ(3),
+    reversion_transaccion BOOLEAN,
+    reversion_codigo_estado INTEGER,
+    reversion_codigo_descripcion VARCHAR(500),
+    reversion_mensajes JSONB,
+
+    creado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_factura_cuf UNIQUE (cuf),
+    CONSTRAINT ck_factura_estado
+        CHECK (estado IN ('EMITIDA', 'ANULADA', 'REVERTIDA', 'RECHAZADA')),
+    CONSTRAINT ck_factura_tipo_documento_identidad
+        CHECK (codigo_tipo_documento_identidad BETWEEN 1 AND 5),
+    CONSTRAINT ck_factura_codigo_excepcion
+        CHECK (codigo_excepcion IS NULL OR codigo_excepcion BETWEEN 0 AND 1),
+    CONSTRAINT ck_factura_montos
+        CHECK (monto_total >= 0 AND monto_total_sujeto_iva >= 0)
+);
+
+CREATE TABLE detalle (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    factura_id BIGINT NOT NULL REFERENCES factura(id) ON DELETE CASCADE,
+    linea INTEGER NOT NULL,
+
+    actividad_economica VARCHAR(10) NOT NULL,
+    codigo_producto_sin BIGINT NOT NULL,
+    codigo_producto VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(500) NOT NULL,
+    cantidad NUMERIC(17,2) NOT NULL,
+    unidad_medida INTEGER NOT NULL,
+    precio_unitario NUMERIC(17,2) NOT NULL,
+    monto_descuento NUMERIC(17,2),
+    sub_total NUMERIC(17,2) NOT NULL,
+    numero_serie VARCHAR(1500),
+    numero_imei VARCHAR(1500),
+
+    CONSTRAINT uq_detalle_factura_linea UNIQUE (factura_id, linea),
+    CONSTRAINT ck_detalle_cantidad CHECK (cantidad > 0),
+    CONSTRAINT ck_detalle_precio_unitario CHECK (precio_unitario > 0),
+    CONSTRAINT ck_detalle_sub_total CHECK (sub_total > 0),
+    CONSTRAINT ck_detalle_monto_descuento
+        CHECK (monto_descuento IS NULL OR monto_descuento >= 0)
+);
+
+CREATE INDEX ix_factura_estado ON factura (estado);
+CREATE INDEX ix_factura_numero_factura ON factura (numero_factura);
+CREATE INDEX ix_factura_fecha_emision ON factura (fecha_emision);
+CREATE INDEX ix_detalle_factura_id ON detalle (factura_id);

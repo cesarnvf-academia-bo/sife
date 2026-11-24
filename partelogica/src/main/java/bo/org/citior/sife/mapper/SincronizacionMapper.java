@@ -2,7 +2,11 @@ package bo.org.citior.sife.mapper;
 
 import bo.org.citior.sife.dominio.SincronizacionEjecucion;
 import bo.org.citior.sife.dominio.catalogo.ProductoServicio;
+import bo.org.citior.sife.dominio.dto.ActividadOpcion;
 import bo.org.citior.sife.dominio.dto.CatalogoFila;
+import bo.org.citior.sife.dominio.dto.ProductoServicioOpcion;
+import bo.org.citior.sife.dominio.dto.TipoDocumentoIdentidadRespuesta;
+import bo.org.citior.sife.dominio.dto.UnidadMedidaOpcion;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -53,4 +57,18 @@ public interface SincronizacionMapper {
     List<CatalogoFila> listarCatalogo(
             @Param("ejecucionId") Long ejecucionId,
             @Param("tipo") String tipo);
+
+    List<TipoDocumentoIdentidadRespuesta> listarTiposDocumentoIdentidad();
+
+    List<ActividadOpcion> listarActividades();
+
+    List<ProductoServicioOpcion> listarProductosServicio();
+
+    List<UnidadMedidaOpcion> listarUnidadesMedida();
+
+    List<bo.org.citior.sife.dominio.dto.CatalogoOpcion> listarMetodosPago();
+
+    List<bo.org.citior.sife.dominio.dto.CatalogoOpcion> listarMonedas();
+
+    List<bo.org.citior.sife.dominio.dto.CatalogoOpcion> listarMotivosAnulacion();
 }

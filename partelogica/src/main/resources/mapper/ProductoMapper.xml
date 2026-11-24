@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.ProductoMapper">
+
+  <resultMap id="productoResultado" type="bo.org.citior.sife.dominio.Producto">
+    <id property="id" column="id"/>
+    <result property="codigoInterno" column="codigo_interno"/>
+    <result property="producto" column="producto"/>
+    <result property="precioUnitario" column="precio_unitario"/>
+    <result property="codigoActividad" column="codigo_actividad"/>
+    <result property="codigoProducto" column="codigo_producto"/>
+    <result property="unidadMedida" column="unidad_medida"/>
+  </resultMap>
+
+  <sql id="filtroBusqueda">
+    <if test="busqueda != null and busqueda != ''">
+      AND (
+        p.codigo_interno ILIKE '%' || #{busqueda} || '%'
+        OR p.producto ILIKE '%' || #{busqueda} || '%'
+        OR p.codigo_actividad ILIKE '%' || #{busqueda} || '%'
+        OR p.codigo_producto::text LIKE '%' || #{busqueda} || '%'
+        OR p.unidad_medida::text LIKE '%' || #{busqueda} || '%'
+      )
+    </if>
+  </sql>
+
+  <select id="contar" resultType="long">
+    SELECT COUNT(*)
+    FROM producto p
+    WHERE TRUE
+    <include refid="filtroBusqueda"/>
+  </select>
+
+  <select id="listar" resultMap="productoResultado">
+    SELECT p.id,
+           p.codigo_interno,
+           p.producto,
+           p.precio_unitario,
+           p.codigo_actividad,
+           p.codigo_producto,
+           p.unidad_medida
+    FROM producto p
+    WHERE TRUE
+    <include refid="filtroBusqueda"/>
+    ORDER BY p.id
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <select id="findById" resultMap="productoResultado">
+    SELECT id,
+           codigo_interno,
+           producto,
+           precio_unitario,
+           codigo_actividad,
+           codigo_producto,
+           unidad_medida
+    FROM producto
+    WHERE id = #{id}
+  </select>
+
+  <select id="existsByCodigoInterno" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1 FROM producto WHERE codigo_interno = #{codigoInterno}
+    )
+  </select>
+
+  <select id="existsByCodigoInternoAndIdNot" resultType="boolean">
+    SELECT EXISTS (
+        SELECT 1
+        FROM producto
+        WHERE codigo_interno = #{codigoInterno}
+          AND id &lt;&gt; #{id}
+    )
+  </select>
+
+  <insert id="insert"
+          parameterType="bo.org.citior.sife.dominio.Producto"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO producto (
+        codigo_interno, producto, precio_unitario,
+        codigo_actividad, codigo_producto, unidad_medida
+    ) VALUES (
+        #{codigoInterno}, #{producto}, #{precioUnitario},
+        #{codigoActividad}, #{codigoProducto}, #{unidadMedida}
+    )
+  </insert>
+
+  <update id="update" parameterType="bo.org.citior.sife.dominio.Producto">
+    UPDATE producto
+    SET codigo_interno = #{codigoInterno},
+        producto = #{producto},
+        precio_unitario = #{precioUnitario},
+        codigo_actividad = #{codigoActividad},
+        codigo_producto = #{codigoProducto},
+        unidad_medida = #{unidadMedida}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM producto WHERE id = #{id}
+  </delete>
+
+</mapper>

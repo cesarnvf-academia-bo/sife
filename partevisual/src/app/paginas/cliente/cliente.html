@@ -1,0 +1,266 @@
+<section class="space-y-5">
+  <header class="flex flex-wrap items-center justify-between gap-3">
+    <div class="text-left">
+      <h1 class="text-2xl font-semibold text-slate-800 dark:text-slate-100">Cliente</h1>
+      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        Administra los clientes del sistema.
+      </p>
+    </div>
+    <sife-boton-icono
+      icono="agregar"
+      etiqueta="Adicionar cliente"
+      texto="Adicionar"
+      variante="primario"
+      (accion)="adicionar()"
+    />
+  </header>
+
+  <sife-modal
+    [abierto]="modalAbierto()"
+    [titulo]="tituloModal()"
+    subtitulo="Complete los datos del cliente."
+    ancho="lg"
+    (cerrar)="cancelar()"
+  >
+    <form
+      [formGroup]="formulario"
+      autocomplete="off"
+      class="grid grid-cols-1 gap-4 md:grid-cols-12"
+    >
+      <label class="block md:col-span-4">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Código interno
+        </span>
+        <input
+          type="text"
+          formControlName="codigoInterno"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.codigoInterno.touched && formulario.controls.codigoInterno.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un código interno de hasta 50 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-8">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Cliente
+        </span>
+        <input
+          type="text"
+          formControlName="cliente"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.cliente.touched && formulario.controls.cliente.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un cliente de hasta 250 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          DIT
+        </span>
+        <input
+          type="text"
+          formControlName="dit"
+          maxlength="50"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.dit.touched && formulario.controls.dit.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un DIT de hasta 50 caracteres.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-6">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Tipo de documento de identidad
+        </span>
+        <select
+          formControlName="tipo"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        >
+          @for (tipo of tiposDocumento(); track tipo.codigo) {
+            <option [ngValue]="tipo.codigo">{{ tipo.descripcion }}</option>
+          }
+        </select>
+        @if (formulario.controls.tipo.touched && formulario.controls.tipo.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Seleccione un tipo de documento de identidad.
+          </span>
+        }
+      </label>
+
+      <label class="block md:col-span-12">
+        <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+          Correo
+        </span>
+        <input
+          type="email"
+          formControlName="correo"
+          maxlength="250"
+          class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+        />
+        @if (formulario.controls.correo.touched && formulario.controls.correo.invalid) {
+          <span class="mt-1 block text-xs text-red-600 dark:text-red-400">
+            Ingrese un correo válido de hasta 250 caracteres.
+          </span>
+        }
+      </label>
+
+      <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4 md:col-span-12 dark:border-slate-800">
+        <sife-boton-icono
+          icono="actualizar"
+          etiqueta="Guardar cliente"
+          texto="Guardar"
+          variante="primario"
+          [deshabilitado]="guardando()"
+          (accion)="guardar()"
+        />
+        <sife-boton-icono
+          icono="limpiar"
+          etiqueta="Cancelar edición"
+          texto="Cancelar"
+          variante="fantasma"
+          [deshabilitado]="guardando()"
+          (accion)="cancelar()"
+        />
+      </div>
+    </form>
+  </sife-modal>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <input
+        type="text"
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+        (keyup.enter)="buscar()"
+        placeholder="Buscar por código interno, cliente, DIT o correo"
+        class="w-64 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      />
+      <sife-boton-icono
+        icono="buscar"
+        etiqueta="Buscar clientes"
+        texto="Buscar"
+        variante="secundario"
+        (accion)="buscar()"
+      />
+      <sife-boton-icono
+        icono="limpiar"
+        etiqueta="Limpiar búsqueda"
+        texto="Limpiar"
+        variante="fantasma"
+        (accion)="limpiar()"
+      />
+    </div>
+
+    <label class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+      Mostrar
+      <select
+        [value]="tamano()"
+        (change)="cambiarTamano($any($event.target).value)"
+        class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-900"
+      >
+        <option [value]="5">5</option>
+        <option [value]="10">10</option>
+        <option [value]="15">15</option>
+        <option [value]="20">20</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <table class="w-full text-left text-sm">
+      <thead class="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
+        <tr>
+          <th class="w-40 px-4 py-3 font-semibold">Cod. interno</th>
+          <th class="px-4 py-3 font-semibold">Cliente</th>
+          <th class="w-40 px-4 py-3 font-semibold">DIT</th>
+          <th class="w-72 px-4 py-3 font-semibold">Tipo</th>
+          <th class="w-64 px-4 py-3 font-semibold">Correo</th>
+          <th class="w-40 px-4 py-3 font-semibold">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+        @for (cliente of clientes(); track cliente.id) {
+          <tr class="text-slate-700 dark:text-slate-200">
+            <td class="px-4 py-3">{{ cliente.codigoInterno }}</td>
+            <td class="px-4 py-3">{{ cliente.cliente }}</td>
+            <td class="px-4 py-3">{{ cliente.dit }}</td>
+            <td class="px-4 py-3">{{ cliente.tipoDescripcion || cliente.tipo }}</td>
+            <td class="px-4 py-3">{{ cliente.correo }}</td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1">
+                <sife-boton-icono
+                  icono="editar"
+                  etiqueta="Editar cliente"
+                  texto="Editar"
+                  variante="fantasma"
+                  (accion)="editar(cliente)"
+                />
+                <sife-boton-icono
+                  icono="borrar"
+                  etiqueta="Borrar cliente"
+                  texto="Borrar"
+                  variante="fantasma"
+                  (accion)="borrar(cliente)"
+                />
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="px-4 py-6 text-center text-slate-500 dark:text-slate-400">
+              No hay clientes registrados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <footer
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 dark:border-slate-800"
+    >
+      <span class="text-sm text-slate-600 dark:text-slate-400">
+        Mostrando {{ desde() }} de {{ total() }}
+      </span>
+      <div class="flex gap-1">
+        <sife-boton-icono
+          icono="primero"
+          etiqueta="Primera página"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="primero()"
+        />
+        <sife-boton-icono
+          icono="anterior"
+          etiqueta="Página anterior"
+          variante="fantasma"
+          [deshabilitado]="esPrimera() || cargando()"
+          (accion)="anterior()"
+        />
+        <sife-boton-icono
+          icono="siguiente"
+          etiqueta="Página siguiente"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="siguiente()"
+        />
+        <sife-boton-icono
+          icono="ultimo"
+          etiqueta="Última página"
+          variante="fantasma"
+          [deshabilitado]="esUltima() || cargando()"
+          (accion)="ultimo()"
+        />
+      </div>
+    </footer>
+  </div>
+</section>

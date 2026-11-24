@@ -43,5 +43,6 @@ public class ClienteSiatFactory {
 
         politica.setConnectionTimeout(propiedades.tiempoConexionMs());
         politica.setReceiveTimeout(propiedades.tiempoRespuestaMs());
+        politica.setConnectionRequestTimeout(propiedades.tiempoConexionMs());
     }
 }

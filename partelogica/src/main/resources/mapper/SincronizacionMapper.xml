@@ -257,4 +257,63 @@
     </choose>
   </select>
 
+  <select id="listarTiposDocumentoIdentidad"
+          resultType="bo.org.citior.sife.dominio.dto.TipoDocumentoIdentidadRespuesta">
+    SELECT DISTINCT ON (codigo) codigo, descripcion
+    FROM sincronizacion_tipo_documento_identidad
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarActividades"
+          resultType="bo.org.citior.sife.dominio.dto.ActividadOpcion">
+    SELECT DISTINCT ON (codigo_caeb) codigo_caeb AS codigo, descripcion
+    FROM sincronizacion_actividad
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo_caeb, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarProductosServicio"
+          resultType="bo.org.citior.sife.dominio.dto.ProductoServicioOpcion">
+    SELECT DISTINCT ON (codigo_producto)
+           codigo_actividad,
+           codigo_producto AS codigo,
+           descripcion_producto AS descripcion
+    FROM sincronizacion_producto_servicio
+    WHERE descripcion_producto IS NOT NULL
+    ORDER BY codigo_producto, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarUnidadesMedida"
+          resultType="bo.org.citior.sife.dominio.dto.UnidadMedidaOpcion">
+    SELECT DISTINCT ON (codigo) codigo, descripcion
+    FROM sincronizacion_unidad_medida
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarMetodosPago"
+          resultType="bo.org.citior.sife.dominio.dto.CatalogoOpcion">
+    SELECT DISTINCT ON (codigo) codigo::text AS codigo, descripcion
+    FROM sincronizacion_tipo_metodo_pago
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarMonedas"
+          resultType="bo.org.citior.sife.dominio.dto.CatalogoOpcion">
+    SELECT DISTINCT ON (codigo) codigo::text AS codigo, descripcion
+    FROM sincronizacion_tipo_moneda
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo, ejecucion_id DESC, id DESC
+  </select>
+
+  <select id="listarMotivosAnulacion"
+          resultType="bo.org.citior.sife.dominio.dto.CatalogoOpcion">
+    SELECT DISTINCT ON (codigo) codigo::text AS codigo, descripcion
+    FROM sincronizacion_motivo_anulacion
+    WHERE descripcion IS NOT NULL
+    ORDER BY codigo, ejecucion_id DESC, id DESC
+  </select>
+
 </mapper>

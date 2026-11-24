@@ -19,6 +19,31 @@
     )
   </insert>
 
+  <select id="obtenerVigente" resultType="bo.org.citior.sife.dominio.Cufd">
+    SELECT c.id,
+           c.empresa_id AS empresaId,
+           c.sucursal_id AS sucursalId,
+           c.puntoventa_id AS puntoventaId,
+           c.cuis_id AS cuisId,
+           c.codigo_sucursal AS codigoSucursal,
+           c.codigo_punto_venta AS codigoPuntoVenta,
+           c.cufd,
+           c.codigo_control AS codigoControl,
+           c.direccion,
+           c.fecha_vigencia AS fechaVigencia,
+           c.transaccion,
+           c.mensajes,
+           c.estado
+    FROM cufd c
+    WHERE c.empresa_id = #{empresaId}
+      AND c.puntoventa_id = #{puntoventaId}
+      AND c.estado = TRUE
+      AND c.cufd IS NOT NULL
+      AND btrim(c.cufd) &lt;&gt; ''
+    ORDER BY c.id DESC
+    LIMIT 1
+  </select>
+
   <update id="activarVigente">
     WITH candidato AS (
       SELECT id

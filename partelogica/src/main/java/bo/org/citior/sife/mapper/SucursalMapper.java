@@ -28,4 +28,6 @@ public interface SucursalMapper {
     void update(Sucursal sucursal);
 
     void delete(@Param("id") Long id);
+
+    List<Sucursal> listarActivos();
 }

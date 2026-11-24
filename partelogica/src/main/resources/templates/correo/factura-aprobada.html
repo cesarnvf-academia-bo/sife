@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura aprobada</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;color:#333333;">
+<div style="max-width:640px;margin:0 auto;padding:24px;background-color:#ffffff;">
+    <h1 style="font-size:22px;margin:0 0 16px 0;">Factura electrónica aprobada</h1>
+    <p style="font-size:15px;line-height:1.5;margin:0 0 16px 0;">
+        Estimado/a <strong th:text="${evento.clienteNombre}">Cliente</strong>:
+    </p>
+    <p style="font-size:15px;line-height:1.5;margin:0 0 20px 0;">
+        Su factura fue recibida y aprobada por el SIAT. A continuación encontrará los datos de la transacción.
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tbody>
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;font-weight:bold;">Número de factura</td>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;" th:text="${evento.numeroFactura}">0</td>
+        </tr>
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;font-weight:bold;">CUF</td>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;word-break:break-all;" th:text="${evento.cuf}">CUF</td>
+        </tr>
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;font-weight:bold;">Fecha de emisión</td>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;" th:text="${evento.fechaEmision}">Fecha</td>
+        </tr>
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;font-weight:bold;">Monto total</td>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;" th:text="${evento.montoTotal}">0.00</td>
+        </tr>
+        <tr>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;font-weight:bold;">Código de recepción</td>
+            <td style="padding:8px;border-bottom:1px solid #dddddd;" th:text="${evento.codigoRecepcion}">Código</td>
+        </tr>
+        </tbody>
+    </table>
+    <p style="font-size:13px;line-height:1.5;margin:24px 0 0 0;color:#666666;">
+        Este correo fue generado automáticamente. No responder a esta dirección.
+    </p>
+</div>
+</body>
+</html>

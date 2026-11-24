@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bo.org.citior.sife.mapper.FacturaMapper">
+
+  <sql id="columnasFactura">
+    id,
+    empresa_id AS empresaId,
+    sucursal_id AS sucursalId,
+    puntoventa_id AS puntoventaId,
+    cuis_id AS cuisId,
+    cufd_id AS cufdId,
+    nit_emisor AS nitEmisor,
+    razon_social_emisor AS razonSocialEmisor,
+    municipio,
+    telefono,
+    numero_factura AS numeroFactura,
+    cuf,
+    cufd,
+    codigo_sucursal AS codigoSucursal,
+    direccion,
+    codigo_punto_venta AS codigoPuntoVenta,
+    fecha_emision AS fechaEmision,
+    nombre_razon_social AS nombreRazonSocial,
+    codigo_tipo_documento_identidad AS codigoTipoDocumentoIdentidad,
+    numero_documento AS numeroDocumento,
+    complemento,
+    codigo_cliente AS codigoCliente,
+    codigo_metodo_pago AS codigoMetodoPago,
+    numero_tarjeta AS numeroTarjeta,
+    monto_total AS montoTotal,
+    monto_total_sujeto_iva AS montoTotalSujetoIva,
+    monto_gift_card AS montoGiftCard,
+    descuento_adicional AS descuentoAdicional,
+    codigo_excepcion AS codigoExcepcion,
+    cafc,
+    codigo_moneda AS codigoMoneda,
+    tipo_cambio AS tipoCambio,
+    monto_total_moneda AS montoTotalMoneda,
+    leyenda,
+    usuario,
+    codigo_documento_sector AS codigoDocumentoSector,
+    codigo_ambiente AS codigoAmbiente,
+    codigo_emision AS codigoEmision,
+    codigo_modalidad AS codigoModalidad,
+    tipo_factura_documento AS tipoFacturaDocumento,
+    xml_firmado AS xmlFirmado,
+    hash_archivo AS hashArchivo,
+    fecha_envio AS fechaEnvio,
+    archivo_gzip AS archivoGzip,
+    respuesta_codigo_descripcion AS respuestaCodigoDescripcion,
+    respuesta_codigo_estado AS respuestaCodigoEstado,
+    respuesta_codigo_recepcion AS respuestaCodigoRecepcion,
+    respuesta_transaccion AS respuestaTransaccion,
+    respuesta_mensajes::text AS respuestaMensajes,
+    respuesta_error AS respuestaError,
+    estado,
+    fecha_anulacion AS fechaAnulacion,
+    codigo_motivo_anulacion AS codigoMotivoAnulacion,
+    anulacion_transaccion AS anulacionTransaccion,
+    anulacion_codigo_estado AS anulacionCodigoEstado,
+    anulacion_codigo_descripcion AS anulacionCodigoDescripcion,
+    anulacion_mensajes::text AS anulacionMensajes,
+    fecha_reversion AS fechaReversion,
+    reversion_transaccion AS reversionTransaccion,
+    reversion_codigo_estado AS reversionCodigoEstado,
+    reversion_codigo_descripcion AS reversionCodigoDescripcion,
+    reversion_mensajes::text AS reversionMensajes,
+    creado_en AS creadoEn,
+    actualizado_en AS actualizadoEn
+  </sql>
+
+  <insert id="insertar"
+          parameterType="bo.org.citior.sife.dominio.Factura"
+          useGeneratedKeys="true"
+          keyProperty="id">
+    INSERT INTO factura (
+        empresa_id, sucursal_id, puntoventa_id, cuis_id, cufd_id,
+        nit_emisor, razon_social_emisor, municipio, telefono, numero_factura,
+        cuf, cufd, codigo_sucursal, direccion, codigo_punto_venta,
+        fecha_emision, nombre_razon_social, codigo_tipo_documento_identidad,
+        numero_documento, complemento, codigo_cliente, codigo_metodo_pago,
+        numero_tarjeta, monto_total, monto_total_sujeto_iva, monto_gift_card,
+        descuento_adicional, codigo_excepcion, cafc, codigo_moneda, tipo_cambio,
+        monto_total_moneda, leyenda, usuario, codigo_documento_sector,
+        codigo_ambiente, codigo_emision, codigo_modalidad, tipo_factura_documento,
+        xml_firmado, hash_archivo, fecha_envio, archivo_gzip,
+        respuesta_codigo_descripcion, respuesta_codigo_estado, respuesta_codigo_recepcion,
+        respuesta_transaccion, respuesta_mensajes, respuesta_error, estado,
+        fecha_anulacion, codigo_motivo_anulacion, anulacion_transaccion,
+        anulacion_codigo_estado, anulacion_codigo_descripcion, anulacion_mensajes,
+        fecha_reversion, reversion_transaccion, reversion_codigo_estado,
+        reversion_codigo_descripcion, reversion_mensajes
+    ) VALUES (
+        #{empresaId}, #{sucursalId}, #{puntoventaId}, #{cuisId}, #{cufdId},
+        #{nitEmisor}, #{razonSocialEmisor}, #{municipio}, #{telefono}, #{numeroFactura},
+        #{cuf}, #{cufd}, #{codigoSucursal}, #{direccion}, #{codigoPuntoVenta},
+        #{fechaEmision}, #{nombreRazonSocial}, #{codigoTipoDocumentoIdentidad},
+        #{numeroDocumento}, #{complemento}, #{codigoCliente}, #{codigoMetodoPago},
+        #{numeroTarjeta}, #{montoTotal}, #{montoTotalSujetoIva}, #{montoGiftCard},
+        #{descuentoAdicional}, #{codigoExcepcion}, #{cafc}, #{codigoMoneda}, #{tipoCambio},
+        #{montoTotalMoneda}, #{leyenda}, #{usuario}, #{codigoDocumentoSector},
+        #{codigoAmbiente}, #{codigoEmision}, #{codigoModalidad}, #{tipoFacturaDocumento},
+        #{xmlFirmado}, #{hashArchivo}, #{fechaEnvio}, #{archivoGzip},
+        #{respuestaCodigoDescripcion}, #{respuestaCodigoEstado}, #{respuestaCodigoRecepcion},
+        #{respuestaTransaccion}, CAST(#{respuestaMensajes} AS jsonb), #{respuestaError}, #{estado},
+        #{fechaAnulacion}, #{codigoMotivoAnulacion}, #{anulacionTransaccion},
+        #{anulacionCodigoEstado}, #{anulacionCodigoDescripcion}, CAST(#{anulacionMensajes} AS jsonb),
+        #{fechaReversion}, #{reversionTransaccion}, #{reversionCodigoEstado},
+        #{reversionCodigoDescripcion}, CAST(#{reversionMensajes} AS jsonb)
+    )
+  </insert>
+
+  <select id="obtenerPorId" resultType="bo.org.citior.sife.dominio.Factura">
+    SELECT
+    <include refid="columnasFactura" />
+    FROM factura
+    WHERE id = #{id}
+  </select>
+
+  <select id="listar" resultType="bo.org.citior.sife.dominio.Factura">
+    SELECT
+    <include refid="columnasFactura" />
+    FROM factura
+    <where>
+      <if test="busqueda != null and busqueda != ''">
+        (
+          CAST(numero_factura AS text) ILIKE CONCAT('%', #{busqueda}, '%')
+          OR cuf ILIKE CONCAT('%', #{busqueda}, '%')
+          OR nombre_razon_social ILIKE CONCAT('%', #{busqueda}, '%')
+          OR codigo_cliente ILIKE CONCAT('%', #{busqueda}, '%')
+        )
+      </if>
+    </where>
+    ORDER BY id DESC
+    LIMIT #{size} OFFSET #{offset}
+  </select>
+
+  <select id="contar" resultType="long">
+    SELECT COUNT(*)
+    FROM factura
+    <where>
+      <if test="busqueda != null and busqueda != ''">
+        (
+          CAST(numero_factura AS text) ILIKE CONCAT('%', #{busqueda}, '%')
+          OR cuf ILIKE CONCAT('%', #{busqueda}, '%')
+          OR nombre_razon_social ILIKE CONCAT('%', #{busqueda}, '%')
+          OR codigo_cliente ILIKE CONCAT('%', #{busqueda}, '%')
+        )
+      </if>
+    </where>
+  </select>
+
+  <select id="siguienteNumeroFactura" resultType="long">
+    SELECT COALESCE(MAX(numero_factura), 0) + 1
+    FROM factura
+  </select>
+
+  <update id="actualizarRespuesta">
+    UPDATE factura
+    SET xml_firmado = #{factura.xmlFirmado},
+        hash_archivo = #{factura.hashArchivo},
+        fecha_envio = #{factura.fechaEnvio},
+        archivo_gzip = #{factura.archivoGzip},
+        respuesta_codigo_descripcion = #{factura.respuestaCodigoDescripcion},
+        respuesta_codigo_estado = #{factura.respuestaCodigoEstado},
+        respuesta_codigo_recepcion = #{factura.respuestaCodigoRecepcion},
+        respuesta_transaccion = #{factura.respuestaTransaccion},
+        respuesta_mensajes = CAST(#{factura.respuestaMensajes} AS jsonb),
+        respuesta_error = #{factura.respuestaError},
+        estado = #{factura.estado},
+        actualizado_en = CURRENT_TIMESTAMP
+    WHERE id = #{id}
+  </update>
+
+  <update id="actualizarAnulacion">
+    UPDATE factura
+    SET fecha_anulacion = #{factura.fechaAnulacion},
+        codigo_motivo_anulacion = #{factura.codigoMotivoAnulacion},
+        anulacion_transaccion = #{factura.anulacionTransaccion},
+        anulacion_codigo_estado = #{factura.anulacionCodigoEstado},
+        anulacion_codigo_descripcion = #{factura.anulacionCodigoDescripcion},
+        anulacion_mensajes = CAST(#{factura.anulacionMensajes} AS jsonb),
+        estado = #{factura.estado},
+        actualizado_en = CURRENT_TIMESTAMP
+    WHERE id = #{id}
+  </update>
+
+  <update id="actualizarReversion">
+    UPDATE factura
+    SET fecha_reversion = #{factura.fechaReversion},
+        reversion_transaccion = #{factura.reversionTransaccion},
+        reversion_codigo_estado = #{factura.reversionCodigoEstado},
+        reversion_codigo_descripcion = #{factura.reversionCodigoDescripcion},
+        reversion_mensajes = CAST(#{factura.reversionMensajes} AS jsonb),
+        estado = #{factura.estado},
+        actualizado_en = CURRENT_TIMESTAMP
+    WHERE id = #{id}
+  </update>
+
+</mapper>
