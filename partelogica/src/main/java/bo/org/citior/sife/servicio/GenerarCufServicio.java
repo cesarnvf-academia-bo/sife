@@ -2,7 +2,7 @@ package bo.org.citior.sife.servicio;
 
 import java.math.BigInteger;
 import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import org.springframework.stereotype.Service;
@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 public class GenerarCufServicio {
 
     private static final int CODIGO_DOCUMENTO_SECTOR = 1;
+    private static final ZoneId ZONA_SIAT = ZoneId.of("America/La_Paz");
     private static final DateTimeFormatter FECHA_FORMAT =
-            DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS", Locale.ROOT).withZone(ZoneOffset.UTC);
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS", Locale.ROOT).withZone(ZONA_SIAT);
 
     public String generar(
             long nitEmisor,
@@ -77,8 +78,9 @@ public class GenerarCufServicio {
         int peso = 2;
         for (int indice = cadena.length() - 1; indice >= 0; indice--) {
             suma += (cadena.charAt(indice) - '0') * peso;
-            peso = peso == 7 ? 2 : peso + 1;
+            peso = peso == 9 ? 2 : peso + 1;
         }
-        return (11 - suma % 11) % 11;
+        int digito = suma % 11;
+        return digito == 10 ? 1 : digito;
     }
 }

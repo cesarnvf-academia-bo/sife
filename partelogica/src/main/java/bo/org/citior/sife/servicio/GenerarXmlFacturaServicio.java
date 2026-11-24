@@ -9,7 +9,7 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -31,9 +31,10 @@ public class GenerarXmlFacturaServicio {
 
     private static final String XSD_RELATIVO = "recursos/facturaElectronicaCompraVenta.xsd";
     private static final String DS_NAMESPACE = "http://www.w3.org/2000/09/xmldsig#";
+    private static final ZoneId ZONA_SIAT = ZoneId.of("America/La_Paz");
     private static final DateTimeFormatter FECHA_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ROOT)
-            .withZone(ZoneOffset.UTC);
+            .withZone(ZONA_SIAT);
 
     public Document construir(Factura factura, List<FacturaDetalle> detalles) {
         if (factura == null) {

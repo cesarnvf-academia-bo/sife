@@ -21,7 +21,7 @@ import bo.org.citior.sife.siat.ClienteSiatFactory;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import java.net.http.HttpTimeoutException;
 import java.time.Instant;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -34,9 +34,10 @@ import org.springframework.stereotype.Service;
 public class FacturaSiatServicio {
 
     private static final int CODIGO_DOCUMENTO_SECTOR = 1;
+    private static final ZoneId ZONA_SIAT = ZoneId.of("America/La_Paz");
     private static final DateTimeFormatter FECHA_ENVIO_FORMAT = DateTimeFormatter
             .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ROOT)
-            .withZone(ZoneOffset.UTC);
+            .withZone(ZONA_SIAT);
 
     private final ClienteSiatFactory clienteSiatFactory;
     private final PropiedadesSiat propiedades;

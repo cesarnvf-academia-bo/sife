@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -59,6 +59,8 @@ import org.w3c.dom.Document;
 @Service
 @RequiredArgsConstructor
 public class FacturaGestionServicio {
+
+    private static final ZoneId ZONA_SIAT = ZoneId.of("America/La_Paz");
 
     private static final Set<Integer> TAMANOS_PERMITIDOS = Set.of(5, 10, 15, 20);
     private static final String ESTADO_EMITIDA = "EMITIDA";
@@ -432,7 +434,8 @@ public class FacturaGestionServicio {
         } catch (DateTimeParseException primera) {
             try {
                 return LocalDateTime.parse(texto.trim(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                        .toInstant(ZoneOffset.UTC);
+                        .atZone(ZONA_SIAT)
+                        .toInstant();
             } catch (DateTimeParseException excepcion) {
                 throw new IllegalArgumentException(
                         "fechaEmision debe tener un formato ISO válido.", excepcion);
